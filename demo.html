@@ -941,7 +941,7 @@ async function renderFromRawEq(res) {
   });
   if (!resp.ok) return null;
   const data = await resp.json();
-  return data.audio_url;
+  return API + data.audio_url;
 }
 
 async function renderAudioForResponse(res) {
@@ -1200,7 +1200,7 @@ async function renderAudioForResponse(res) {
   });
   if (!resp.ok) return null;
   const data = await resp.json();
-  return data.audio_url;
+  return API + data.audio_url;
 }
 
 let audioCounter = 0;
