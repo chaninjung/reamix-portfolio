@@ -1,0 +1,1274 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ReaMix AI — Personalisation Demo</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+  :root {
+    --bg: #0a0a0f;
+    --surface: #13131a;
+    --border: #1e1e2e;
+    --text: #e0e0e0;
+    --text-dim: #888;
+    --user-a: #6c63ff;
+    --user-b: #ff6b6b;
+    --accent: #00d4aa;
+    --accent2: #ff9f43;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  .header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0.75rem 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .header a { color: var(--text-dim); text-decoration: none; font-size: 0.85rem; }
+  .header h1 { font-size: 1rem; font-weight: 600; color: var(--accent); }
+
+  /* Scenario Steps */
+  .scenario {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 1.5rem 2rem;
+  }
+
+  .intro {
+    text-align: center;
+    margin-bottom: 2rem;
+  }
+  .intro h2 {
+    font-size: 1.3rem;
+    margin-bottom: 0.5rem;
+  }
+  .intro p {
+    color: var(--text-dim);
+    font-size: 0.9rem;
+    max-width: 700px;
+    margin: 0 auto;
+  }
+
+  .step {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    margin-bottom: 1.5rem;
+    overflow: hidden;
+    opacity: 0.3;
+    pointer-events: none;
+    transition: opacity 0.5s, transform 0.5s;
+    transform: translateY(10px);
+  }
+  .step.active {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0);
+    border-color: var(--accent);
+  }
+  .step.done {
+    opacity: 0.85;
+    pointer-events: auto;
+    transform: translateY(0);
+  }
+
+  .step-header {
+    padding: 0.75rem 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .step-num {
+    background: var(--accent);
+    color: #000;
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700;
+    font-size: 0.8rem;
+    flex-shrink: 0;
+  }
+  .step.done .step-num { background: #444; color: #aaa; }
+  .step-title { font-weight: 600; font-size: 0.95rem; }
+  .step-desc { color: var(--text-dim); font-size: 0.8rem; margin-left: auto; }
+
+  .step-body { padding: 1.25rem; }
+
+  /* Chat comparison layout */
+  .chat-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+  .chat-col {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1rem;
+  }
+  .chat-col.col-a { border-left: 3px solid var(--user-a); }
+  .chat-col.col-b { border-left: 3px solid var(--user-b); }
+
+  .chat-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .chat-label.label-a { color: var(--user-a); }
+  .chat-label.label-b { color: var(--user-b); }
+
+  .chat-query {
+    background: rgba(255,255,255,0.05);
+    border-radius: 8px;
+    padding: 0.5rem 0.75rem;
+    margin-bottom: 0.5rem;
+    font-size: 0.85rem;
+    text-align: right;
+  }
+
+  .chat-response {
+    font-size: 0.85rem;
+    line-height: 1.5;
+  }
+  .chat-response .explain { margin-bottom: 0.5rem; }
+  .chat-response .params {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--text-dim);
+    background: rgba(0,0,0,0.3);
+    border-radius: 6px;
+    padding: 0.5rem;
+  }
+
+  .feedback-row {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+  }
+  .fb-btn {
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 0.25rem 0.6rem;
+    color: var(--text-dim);
+    font-size: 0.75rem;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.2s;
+  }
+  .fb-btn:hover { border-color: var(--text); color: var(--text); }
+  .fb-btn.selected { border-color: var(--accent); color: var(--accent); background: rgba(0,212,170,0.1); }
+
+  .next-btn {
+    background: linear-gradient(135deg, var(--accent), #00a88a);
+    border: none;
+    border-radius: 8px;
+    padding: 0.6rem 1.5rem;
+    color: #000;
+    font-weight: 600;
+    font-size: 0.85rem;
+    cursor: pointer;
+    font-family: inherit;
+    display: block;
+    margin: 0 auto;
+    transition: opacity 0.2s;
+  }
+  .next-btn:hover { opacity: 0.9; }
+
+  /* Audio section */
+  .audio-section {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1rem;
+    margin-top: 1rem;
+  }
+  .audio-title {
+    text-align: center;
+    font-weight: 600;
+    font-size: 0.85rem;
+    color: var(--accent2);
+    margin-bottom: 0.75rem;
+  }
+  .audio-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 0.75rem;
+  }
+  .audio-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.75rem;
+    text-align: center;
+  }
+  .audio-card-label {
+    font-weight: 600;
+    font-size: 0.8rem;
+    margin-bottom: 0.3rem;
+  }
+  .audio-card-params {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--text-dim);
+    margin-bottom: 0.5rem;
+    min-height: 2rem;
+  }
+  .play-btn {
+    background: linear-gradient(135deg, var(--user-a), var(--user-b));
+    border: none;
+    border-radius: 6px;
+    padding: 0.35rem 1rem;
+    color: white;
+    font-weight: 600;
+    font-size: 0.75rem;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .play-btn:hover { opacity: 0.85; }
+  .play-btn.playing { animation: pulse 1s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.6} }
+
+  .stop-btn {
+    display: block;
+    margin: 0.5rem auto 0;
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 0.25rem 0.8rem;
+    color: var(--text-dim);
+    font-size: 0.7rem;
+    cursor: pointer;
+    font-family: inherit;
+  }
+
+  .system-note {
+    text-align: center;
+    font-size: 0.8rem;
+    color: var(--accent);
+    padding: 0.5rem;
+    background: rgba(0,212,170,0.05);
+    border-radius: 6px;
+    margin-top: 0.5rem;
+  }
+
+  .undo-visual {
+    text-align: center;
+    padding: 0.5rem;
+    color: var(--user-b);
+    font-size: 0.85rem;
+    font-weight: 600;
+  }
+
+  /* Final summary */
+  .summary {
+    background: var(--surface);
+    border: 1px solid var(--accent);
+    border-radius: 12px;
+    padding: 1.5rem;
+    text-align: center;
+    opacity: 0.3;
+    pointer-events: none;
+    transition: opacity 0.5s;
+  }
+  .summary.active { opacity: 1; pointer-events: auto; }
+  .summary h3 { color: var(--accent); margin-bottom: 0.75rem; }
+  .summary p { color: var(--text-dim); font-size: 0.9rem; line-height: 1.6; }
+  .summary .highlight { color: var(--text); font-weight: 600; }
+
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <a href="index.html">← Portfolio</a>
+  <h1>ReaMix AI — Personalisation Demo</h1>
+  <span style="color:var(--text-dim);font-size:0.8rem">Guided Scenario</span>
+</div>
+
+<div class="scenario">
+  <div class="intro">
+    <h2>같은 말, 다른 해석</h2>
+    <p>"로우미드 살려서 바디감 좀 줘" — 이 한마디를 User A와 User B는 다르게 해석합니다.<br>
+    아래 시나리오를 따라가며 개인화 엔진이 어떻게 작동하는지 확인하세요.</p>
+  </div>
+
+  <!-- STEP 1: Setup -->
+  <div class="step active" id="step1">
+    <div class="step-header">
+      <div class="step-num">1</div>
+      <div class="step-title">유저 프로필 학습</div>
+      <div class="step-desc">두 유저에게 서로 다른 믹싱 성향을 학습시킵니다</div>
+    </div>
+    <div class="step-body">
+      <div class="chat-row">
+        <div class="chat-col col-a">
+          <div class="chat-label label-a">User A — 내추럴 톤 (transparent, 원본 존중)</div>
+          <div class="chat-response">
+            <div class="params">
+              과거 5회 interaction:<br>
+              • "로우미드 1.5dB만 올려줘" → intensity 0.3<br>
+              • "200Hz 부근 살짝만 부스트" → intensity 0.2<br>
+              • "룸 리버브 아주 짧게" → intensity 0.3<br>
+              • "하이셸프 살짝 내려줘" → intensity 0.25<br>
+              • 모든 feedback: "좋아" ✓<br>
+              <br>Style tags: <span style="color:var(--user-a)">natural/transparent</span>
+            </div>
+          </div>
+        </div>
+        <div class="chat-col col-b">
+          <div class="chat-label label-b">User B — 아날로그 톤 (colored, 따뜻한 질감 선호)</div>
+          <div class="chat-response">
+            <div class="params">
+              과거 5회 interaction:<br>
+              • "250Hz 4dB 부스트하고 로우셸프도 올려" → intensity 0.9<br>
+              • "로우미드 더 올려, 확실하게" → intensity 0.95<br>
+              • "리버브 좀 넉넉하게 걸어줘" → intensity 0.85<br>
+              • "킥이랑 베이스 펀치감 살려줘" → intensity 0.9<br>
+              • 모든 feedback: "좋아" ✓<br>
+              <br>Style tags: <span style="color:var(--user-b)">analog/colored</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <button class="next-btn" onclick="goStep(2)">다음 →  같은 요청 보내기</button>
+    </div>
+  </div>
+
+  <!-- STEP 2: Same query, different results -->
+  <div class="step" id="step2">
+    <div class="step-header">
+      <div class="step-num">2</div>
+      <div class="step-title">"로우미드 살려서 바디감 좀 줘" — 같은 요청, 다른 해석</div>
+      <div class="step-desc">동일한 쿼리가 유저별로 다르게 처리됩니다</div>
+    </div>
+    <div class="step-body">
+      <div class="chat-row">
+        <div class="chat-col col-a">
+          <div class="chat-label label-a">User A</div>
+          <div class="chat-query">로우미드 살려서 바디감 좀 줘</div>
+          <div class="chat-response">
+            <div class="explain">전체 트랙에 은은하게 바디감을 살립니다. 이전 선호도에 맞춰 <strong>자연스럽고 절제된 부스트</strong>를 적용합니다.</div>
+            <div class="params">
+              ReaEQ: 280Hz +1.5dB (Q 0.8)<br>
+              Low Shelf: 120Hz +1.0dB<br>
+              confidence: 95%
+            </div>
+          </div>
+        </div>
+        <div class="chat-col col-b">
+          <div class="chat-label label-b">User B</div>
+          <div class="chat-query">로우미드 살려서 바디감 좀 줘</div>
+          <div class="chat-response">
+            <div class="explain">바디감을 확실히 살립니다. 이전 요청을 바탕으로 <strong>더 풍성한 로우미드와 따뜻한 공간감</strong>을 적용합니다.</div>
+            <div class="params">
+              ReaEQ: 250Hz +4.5dB (Q 0.6)<br>
+              Low Shelf: 120Hz +3.0dB<br>
+              HF Rolloff: 6kHz −1.5dB<br>
+              confidence: 100%
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Audio comparison -->
+      <div class="audio-section">
+        <div class="audio-title">🎧 직접 들어보세요 — torchaudio DSP 처리 결과</div>
+        <div class="audio-grid">
+          <div class="audio-card">
+            <div class="audio-card-label">🎵 Original</div>
+            <div class="audio-card-params">처리 없음</div>
+            <audio id="a_orig" src="sample_original.wav" preload="auto"></audio>
+            <button class="play-btn" onclick="toggle('a_orig',this)">▶ Play</button>
+          </div>
+          <div class="audio-card" style="border-color:var(--user-a)">
+            <div class="audio-card-label" style="color:var(--user-a)">🅰️ User A</div>
+            <div class="audio-card-params">EQ +1.5dB @ 280Hz<br>→ 은은한 바디감</div>
+            <audio id="a_userA" src="sample_user_a.wav" preload="auto"></audio>
+            <button class="play-btn" onclick="toggle('a_userA',this)">▶ Play</button>
+          </div>
+          <div class="audio-card" style="border-color:var(--user-b)">
+            <div class="audio-card-label" style="color:var(--user-b)">🅱️ User B</div>
+            <div class="audio-card-params">EQ +4.5dB @ 250Hz<br>Low Shelf +3dB<br>→ 아날로그 톤</div>
+            <audio id="a_userB" src="sample_user_b.wav" preload="auto"></audio>
+            <button class="play-btn" onclick="toggle('a_userB',this)">▶ Play</button>
+          </div>
+        </div>
+        <button class="stop-btn" onclick="stopAll()">⏹ Stop All</button>
+      </div>
+
+      <br>
+      <button class="next-btn" id="next2" onclick="goStep(3)">다음 → User B 피드백 반영</button>
+    </div>
+  </div>
+
+  <!-- STEP 3: Feedback & Undo -->
+  <div class="step" id="step3">
+    <div class="step-header">
+      <div class="step-num">3</div>
+      <div class="step-title">User B: "로우미드가 좀 과한데, 돌려줘"</div>
+      <div class="step-desc">피드백 → 되돌리기 → 재학습</div>
+    </div>
+    <div class="step-body">
+      <div class="chat-row">
+        <div class="chat-col col-a">
+          <div class="chat-label label-a">User A — 변화 없음</div>
+          <div class="chat-response">
+            <div class="system-note">✓ User A는 만족 → 선호도 유지</div>
+            <div class="params" style="margin-top:0.5rem">
+              preferred_intensity: 0.30 (유지)<br>
+              feedback_score: +1.0 (good)
+            </div>
+          </div>
+        </div>
+        <div class="chat-col col-b">
+          <div class="chat-label label-b">User B — 되돌리기 + 학습</div>
+          <div class="chat-query">로우미드가 좀 과한데, 전으로 돌려줘</div>
+          <div class="chat-response">
+            <div class="undo-visual">↩️ Action #6 (warm) 되돌리기 실행</div>
+            <div class="explain">이전 로우미드 부스트를 되돌렸습니다. "과하다"는 맥락에서 다음번에는 부스트량을 줄여 적용하겠습니다.</div>
+            <div class="params">
+              대화 맥락 분석: "과한데" → intensity 하향 필요<br>
+              preferred_intensity: 0.90 → <span style="color:var(--user-b)">0.71</span> (자동 조정)<br>
+              <br>
+              Lua: reaper.Main_OnCommand(40029, 0) -- Undo
+            </div>
+          </div>
+        </div>
+      </div>
+      <button class="next-btn" onclick="goStep(4)">다음 → 같은 요청 다시 보내기</button>
+    </div>
+  </div>
+
+  <!-- STEP 4: After feedback -->
+  <div class="step" id="step4">
+    <div class="step-header">
+      <div class="step-num">4</div>
+      <div class="step-title">다시 "로우미드 살려서 바디감 줘" — 학습된 결과</div>
+      <div class="step-desc">User B의 피드백이 반영되어 파라미터가 조정됩니다</div>
+    </div>
+    <div class="step-body">
+      <div class="chat-row">
+        <div class="chat-col col-a">
+          <div class="chat-label label-a">User A — 동일</div>
+          <div class="chat-query">로우미드 살려서 바디감 좀 줘</div>
+          <div class="chat-response">
+            <div class="explain">이전과 동일하게 절제된 바디감을 적용합니다.</div>
+            <div class="params">
+              ReaEQ: 280Hz +1.5dB (Q 0.8)<br>
+              Low Shelf: 120Hz +1.0dB<br>
+              <span style="color:var(--text-dim)">→ 변화 없음 (선호도 유지)</span>
+            </div>
+          </div>
+        </div>
+        <div class="chat-col col-b">
+          <div class="chat-label label-b">User B — 학습 반영</div>
+          <div class="chat-query">로우미드 살려서 바디감 좀 줘</div>
+          <div class="chat-response">
+            <div class="explain">"과하다"는 이전 맥락을 반영하여 <strong>부스트량을 줄여</strong> 적용합니다.</div>
+            <div class="params">
+              ReaEQ: 250Hz <span style="color:var(--user-b)">+3.0dB</span> (Q 0.7) <span style="color:var(--text-dim)">← was +4.5dB</span><br>
+              Low Shelf: 120Hz <span style="color:var(--user-b)">+2.0dB</span> <span style="color:var(--text-dim)">← was +3.0dB</span><br>
+              HF Rolloff: 6kHz <span style="color:var(--user-b)">−0.8dB</span> <span style="color:var(--text-dim)">← was −1.5dB</span><br>
+              <span style="color:var(--accent)">→ 파라미터 자동 하향 조정됨</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Audio comparison after feedback -->
+      <div class="audio-section">
+        <div class="audio-title">🎧 피드백 반영 후 — User B의 소리가 달라졌습니다</div>
+        <div class="audio-grid">
+          <div class="audio-card">
+            <div class="audio-card-label">🅱️ Before (너무 강함)</div>
+            <div class="audio-card-params">EQ +4.5dB · HF −1.5dB</div>
+            <audio id="a_bBefore" src="sample_user_b.wav" preload="auto"></audio>
+            <button class="play-btn" onclick="toggle('a_bBefore',this)">▶ Play</button>
+          </div>
+          <div class="audio-card" style="border-color:var(--accent)">
+            <div class="audio-card-label" style="color:var(--accent)">🅱️ After (학습 반영)</div>
+            <div class="audio-card-params">EQ +3dB · HF −0.8dB</div>
+            <audio id="a_bAfter" src="sample_user_b_after.wav" preload="auto"></audio>
+            <button class="play-btn" onclick="toggle('a_bAfter',this)">▶ Play</button>
+          </div>
+          <div class="audio-card" style="border-color:var(--user-a)">
+            <div class="audio-card-label" style="color:var(--user-a)">🅰️ User A (변화 없음)</div>
+            <div class="audio-card-params">EQ +1.5dB @ 280Hz</div>
+            <audio id="a_userA2" src="sample_user_a.wav" preload="auto"></audio>
+            <button class="play-btn" onclick="toggle('a_userA2',this)">▶ Play</button>
+          </div>
+        </div>
+        <button class="stop-btn" onclick="stopAll()">⏹ Stop All</button>
+      </div>
+
+      <br>
+      <button class="next-btn" onclick="goStep(5)">결과 요약 보기</button>
+    </div>
+  </div>
+
+  <!-- STEP 5: Summary -->
+  <div class="summary" id="step5">
+    <h3>Personalisation Engine — 핵심 구조</h3>
+    <p>
+      같은 <span class="highlight">"로우미드 살려서 바디감 줘"</span>라는 요청이<br>
+      User A에게는 <span style="color:var(--user-a)">EQ +1.5dB @ 280Hz</span>,<br>
+      User B에게는 <span style="color:var(--user-b)">EQ +4.5dB @ 250Hz + Low Shelf +3dB</span>로 해석되었습니다.<br><br>
+      User B가 <span class="highlight">"로우미드가 좀 과한데"</span>라고 피드백하자<br>
+      시스템이 대화 맥락에서 선호도를 조정하고,<br>
+      다음 요청에서 <span style="color:var(--accent)">EQ +3dB, Low Shelf +2dB</span>로 파라미터를 낮췄습니다.<br><br>
+      <span class="highlight">STM/LTM 메모리</span> ·
+      <span class="highlight">EMA 선호도 추적</span> ·
+      <span class="highlight">피드백 루프</span> ·
+      <span class="highlight">스타일 태그 추론</span> ·
+      <span class="highlight">감정 인식</span><br><br>
+      <span style="color:var(--text-dim);font-size:0.8rem">216 tests passing · Python/FastAPI · torchaudio DSP · Gemini LLM</span>
+    </p>
+    <br>
+    <a href="index.html" style="color:var(--accent);text-decoration:none;font-weight:600">← 전체 포트폴리오 보기</a>
+    <br><br>
+    <button class="next-btn" onclick="showLive()">🎤 직접 해보기 — Live Mode</button>
+  </div>
+
+  <!-- LIVE MODE -->
+  <div id="liveMode" style="display:none;margin-top:2rem">
+    <div class="step active" style="opacity:1;pointer-events:auto;transform:none;border-color:var(--accent2)">
+      <div class="step-header" style="border-color:var(--accent2)">
+        <div class="step-num" style="background:var(--accent2)">⚡</div>
+        <div class="step-title">Live Mode — 직접 체험하기</div>
+        <div class="step-desc" id="liveStatus">서버 확인 중...</div>
+      </div>
+      <div class="step-body">
+        <p style="color:var(--text-dim);font-size:0.85rem;margin-bottom:1rem;text-align:center">
+          <strong style="color:var(--user-a)">User A</strong>는 프로 엔지니어 (내추럴 톤) — 스크립트로 자동 진행됩니다.<br>
+          <strong style="color:var(--user-b)">User B</strong>는 당신입니다 — 직접 타이핑해보세요.<br>
+          <span style="color:var(--accent2)">같은 시스템이 유저별로 다르게 반응하는 것을 확인하세요.</span>
+        </p>
+
+        <!-- Profile cards -->
+        <div class="chat-row" style="margin-bottom:0.75rem">
+          <div style="text-align:center">
+            <span class="chat-label label-a">User A — 프로 엔지니어 (자동)</span>
+            <div class="params" id="liveProfileA" style="font-size:0.7rem;margin-top:0.25rem">interactions: 0 | style: —</div>
+          </div>
+          <div style="text-align:center">
+            <span class="chat-label label-b">User B — 당신 (직접 입력)</span>
+            <div class="params" id="liveProfileB" style="font-size:0.7rem;margin-top:0.25rem">interactions: 0 | style: —</div>
+          </div>
+        </div>
+
+        <!-- Chat panels -->
+        <div class="chat-row">
+          <div>
+            <div class="chat-col col-a" style="min-height:300px;max-height:500px;overflow-y:auto" id="liveChatA">
+              <div style="color:var(--text-dim);font-size:0.8rem;text-align:center">
+                🎧 프로 엔지니어의 대화가 자동으로 진행됩니다
+              </div>
+            </div>
+            <button class="next-btn" onclick="startEngineerScript()" id="scriptStartBtn" style="margin-top:0.5rem;width:100%;background:linear-gradient(135deg,var(--user-a),#4a44cc)">🅰️ 엔지니어 시나리오 시작 (먼저 이 버튼!)</button>
+          </div>
+          <div>
+            <div class="chat-col col-b" style="min-height:300px;max-height:500px;overflow-y:auto" id="liveChatB">
+              <div style="color:var(--text-dim);font-size:0.8rem;text-align:center">
+                ✍️ A 시나리오 완료 후 자유롭게 타이핑해보세요<br>
+                <span style="font-size:0.7rem">예: "로우미드 좀 살려줘", "하이엔드 좀 깎아줘", "보컬에 공간감 줘"</span>
+              </div>
+            </div>
+            <!-- User B Input (disabled until A is done) -->
+            <div style="display:flex;gap:0.5rem;margin-top:0.5rem" id="bInputRow">
+              <span style="color:var(--user-b);font-weight:600;padding:0.6rem 0;font-size:0.85rem">B:</span>
+              <input type="text" id="liveInput" disabled
+                placeholder="A 시나리오 완료 후 입력 가능"
+                onkeydown="if(event.key==='Enter')liveSendB()"
+                style="flex:1;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:0.6rem 1rem;color:var(--text-dim);font-family:inherit;font-size:0.85rem;outline:none;opacity:0.5">
+              <button class="next-btn" id="liveSendBtn" onclick="liveSendB()" disabled style="margin:0;white-space:nowrap;opacity:0.5">전송 →</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Reset -->
+        <div style="text-align:center;margin-top:0.75rem">
+          <button class="fb-btn" onclick="liveReset()">🔄 전체 초기화</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+let currentStep = 1;
+
+function goStep(n) {
+  // Mark current as done
+  const cur = document.getElementById('step' + currentStep);
+  if (cur) { cur.classList.remove('active'); cur.classList.add('done'); }
+
+  // Activate next
+  const next = document.getElementById('step' + n);
+  if (next) {
+    next.classList.add('active');
+    next.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  currentStep = n;
+  stopAll();
+}
+
+function selectFb(groupId, feedback, btn) {
+  const row = btn.parentElement;
+  // Toggle
+  if (btn.classList.contains('selected')) {
+    btn.classList.remove('selected');
+    return;
+  }
+  row.querySelectorAll('.fb-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+}
+
+// Audio
+const allAudioIds = ['a_orig','a_userA','a_userB','a_bBefore','a_bAfter','a_userA2'];
+
+function toggle(id, btn) {
+  const audio = document.getElementById(id);
+  if (!audio) return;
+
+  // Stop all others
+  allAudioIds.forEach(aid => {
+    if (aid !== id) {
+      const el = document.getElementById(aid);
+      if (el) { el.pause(); el.currentTime = 0; }
+    }
+  });
+  document.querySelectorAll('.play-btn').forEach(b => {
+    if (b !== btn) { b.classList.remove('playing'); b.textContent = '▶ Play'; }
+  });
+
+  if (audio.paused) {
+    audio.play();
+    btn.classList.add('playing');
+    btn.textContent = '⏸ Pause';
+  } else {
+    audio.pause();
+    btn.classList.remove('playing');
+    btn.textContent = '▶ Play';
+  }
+
+  audio.onended = () => {
+    btn.classList.remove('playing');
+    btn.textContent = '▶ Play';
+  };
+}
+
+function stopAll() {
+  allAudioIds.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) { el.pause(); el.currentTime = 0; }
+  });
+  document.querySelectorAll('.play-btn').forEach(b => {
+    b.classList.remove('playing');
+    b.textContent = '▶ Play';
+  });
+}
+
+// =============================================
+// LIVE MODE
+// =============================================
+const API = 'https://niiiiniiii-reamix-ai.hf.space';
+
+function showLive() {
+  document.getElementById('liveMode').style.display = 'block';
+  document.getElementById('liveMode').scrollIntoView({ behavior: 'smooth' });
+  checkServer();
+}
+
+async function checkServer() {
+  try {
+    const res = await fetch(`${API}/health`);
+    if (res.ok) {
+      document.getElementById('liveStatus').innerHTML = '<span style="color:var(--accent)">● Server Connected</span>';
+    }
+  } catch {
+    document.getElementById('liveStatus').innerHTML = '<span style="color:var(--user-b)">● Server Offline — python -m server.cli</span>';
+  }
+}
+
+// --- Engineer script (User A auto-play) ---
+const engineerScript = [
+  { query: '로우미드를 살짝 올려서 바디감 좀 살려줘', delay: 0 },
+  { query: '좋아. 근데 200Hz 부근이 좀 머디하네. 조금만 깎아줘', delay: 2000 },
+  { query: '새츄레이션 아주 살짝만. 테이프 느낌으로', delay: 2000 },
+  { query: '하이미드가 좀 거칠어. 2k 부근 살짝 디핑해줘', delay: 2000 },
+  { query: '리버브 짧게, 룸 느낌으로 공간감만 살짝', delay: 2000 },
+];
+
+let scriptRunning = false;
+
+async function startEngineerScript() {
+  if (scriptRunning) return;
+  scriptRunning = true;
+
+  const btn = document.getElementById('scriptStartBtn');
+  btn.disabled = true;
+  btn.textContent = '🅰️ 진행 중...';
+
+  // Reset User A
+  try { await fetch(`${API}/users/user_a`, { method: 'DELETE' }); } catch {}
+  try {
+    await fetch(`${API}/users/user_a/profile`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ display_name: 'Pro Engineer', profile_notes: '10년차 믹싱 엔지니어. 은은하고 자연스러운 사운드를 선호.' }),
+    });
+  } catch {}
+
+  document.getElementById('liveChatA').innerHTML = '';
+  addLiveMsg('liveChatA', '🎧 프로 엔지니어 세션 시작', 'system');
+
+  for (const step of engineerScript) {
+    if (step.delay > 0) await new Promise(r => setTimeout(r, step.delay));
+
+    addLiveMsg('liveChatA', step.query, 'user');
+    const loading = addLiveMsg('liveChatA', '🤖 처리 중...', 'loading');
+
+    try {
+      const res = await fetchMix(step.query, 'user_a');
+      loading.remove();
+
+      // Real-time render from LLM's raw_eq
+      let audioFile = null;
+      try { audioFile = await renderFromRawEq(res); } catch {}
+      addLiveResponse('liveChatA', res, 'user_a', audioFile);
+    } catch (e) {
+      loading.remove();
+      addLiveMsg('liveChatA', '❌ ' + e.message, 'error');
+    }
+
+    updateLiveProfiles();
+  }
+
+  addLiveMsg('liveChatA', '✅ 엔지니어 세션 완료 — 이제 User B로 직접 해보세요!', 'system');
+  btn.textContent = '✅ 완료';
+  btn.disabled = true;
+  scriptRunning = false;
+
+  // Enable User B input
+  enableUserB();
+}
+
+function enableUserB() {
+  const input = document.getElementById('liveInput');
+  const btn = document.getElementById('liveSendBtn');
+  input.disabled = false;
+  input.placeholder = '예: 로우미드 살려줘, 하이엔드 정리해줘, 보컬 앞으로 빼줘 (Enter)';
+  input.style.borderColor = 'var(--user-b)';
+  input.style.color = 'var(--text)';
+  input.style.opacity = '1';
+  btn.disabled = false;
+  btn.style.opacity = '1';
+  input.focus();
+}
+
+// --- User B live chat ---
+async function liveSendB() {
+  const input = document.getElementById('liveInput');
+  const query = input.value.trim();
+  if (!query) return;
+  input.value = '';
+
+  const btn = document.getElementById('liveSendBtn');
+  btn.disabled = true;
+  btn.textContent = '⏳';
+
+  addLiveMsg('liveChatB', query, 'user');
+  const loading = addLiveMsg('liveChatB', '🤖 생각 중...', 'loading');
+
+  try {
+    const res = await fetchMix(query, 'user_b');
+    loading.remove();
+
+    // Render audio: raw_eq first (real LLM params), concept mapping fallback
+    let audioFile = null;
+    try { audioFile = await renderFromRawEq(res); } catch {}
+    if (!audioFile) {
+      try { audioFile = await renderAudioForResponse(res); } catch {}
+    }
+    addLiveResponse('liveChatB', res, 'user_b', audioFile);
+  } catch (e) {
+    loading.remove();
+    addLiveMsg('liveChatB', '❌ ' + e.message, 'error');
+  }
+
+  btn.disabled = false;
+  btn.textContent = '전송 →';
+  updateLiveProfiles();
+}
+
+// --- Shared utilities ---
+async function liveReset() {
+  try {
+    await fetch(`${API}/users/user_a`, { method: 'DELETE' });
+    await fetch(`${API}/users/user_b`, { method: 'DELETE' });
+  } catch {}
+  document.getElementById('liveChatA').innerHTML = '<div style="color:var(--text-dim);font-size:0.8rem;text-align:center">🎧 초기화됨</div>';
+  document.getElementById('liveChatB').innerHTML = '<div style="color:var(--text-dim);font-size:0.8rem;text-align:center">✍️ 초기화됨</div>';
+  const btn = document.getElementById('scriptStartBtn');
+  btn.disabled = false;
+  btn.textContent = '🅰️ 엔지니어 시나리오 시작';
+  scriptRunning = false;
+  updateLiveProfiles();
+}
+
+async function updateLiveProfiles() {
+  for (const [userId, elId] of [['user_a', 'liveProfileA'], ['user_b', 'liveProfileB']]) {
+    try {
+      const res = await fetch(`${API}/users/${userId}/profile`);
+      if (!res.ok) { document.getElementById(elId).textContent = 'interactions: 0 | style: —'; continue; }
+      const p = await res.json();
+      const tags = (p.style_tags || []).join(', ') || '—';
+      const prefs = Object.entries(p.concept_preferences || {})
+        .sort((a,b) => b[1].usage_count - a[1].usage_count)
+        .slice(0, 8)
+        .map(([k,v]) => {
+          const fb = v.avg_feedback > 0.3 ? '✓' : v.avg_feedback < -0.3 ? '✗' : '';
+          return `${k}(${v.preferred_intensity.toFixed(2)},${v.usage_count}x)${fb}`;
+        })
+        .join(' · ') || '—';
+      document.getElementById(elId).innerHTML =
+        `interactions: <strong>${p.interaction_count}</strong> | style: ${tags}<br>
+         <span style="font-size:0.65rem">prefs: ${prefs}</span>`;
+    } catch {
+      document.getElementById(elId).textContent = 'interactions: 0 | style: —';
+    }
+  }
+}
+
+async function fetchMix(query, userId, retries = 3) {
+  for (let attempt = 0; attempt < retries; attempt++) {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 60000);
+    try {
+      const res = await fetch(`${API}/mix`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query, user_id: userId }),
+        signal: controller.signal,
+      });
+      clearTimeout(timeout);
+      if (res.status === 500 && attempt < retries - 1) {
+        // Rate limit or server error — wait and retry
+        const waitSec = (attempt + 1) * 15;
+        console.log(`Retry ${attempt+1}/${retries} after ${waitSec}s...`);
+        await new Promise(r => setTimeout(r, waitSec * 1000));
+        continue;
+      }
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      return await res.json();
+    } catch (e) {
+      clearTimeout(timeout);
+      if (e.name === 'AbortError') throw new Error('60초 타임아웃');
+      if (attempt < retries - 1 && !(e instanceof TypeError)) {
+        await new Promise(r => setTimeout(r, 10000));
+        continue;
+      }
+      throw e;
+    }
+  }
+}
+
+function addLiveMsg(panelId, text, type) {
+  const panel = document.getElementById(panelId);
+  const div = document.createElement('div');
+  const styles = {
+    user: 'background:rgba(255,255,255,0.05);border-radius:8px;padding:0.4rem 0.6rem;margin:0.4rem 0;font-size:0.85rem;text-align:right',
+    error: 'color:var(--user-b);font-size:0.8rem;margin:0.4rem 0',
+    loading: 'color:var(--text-dim);font-size:0.8rem;margin:0.4rem 0;animation:pulse 1s infinite',
+    system: 'color:var(--accent);font-size:0.75rem;margin:0.4rem 0;text-align:center;font-weight:600',
+  };
+  div.style.cssText = styles[type] || styles.loading;
+  div.textContent = text;
+  panel.appendChild(div);
+  panel.scrollTop = panel.scrollHeight;
+  return div;
+}
+
+async function renderFromRawEq(res) {
+  // Use LLM's raw_eq parameters directly — this is the REAL rendering
+  const rawEq = res.raw_eq;
+  if (!rawEq || !Array.isArray(rawEq) || rawEq.length === 0) return null;
+
+  // Convert LLM raw_eq format to /demo/process format
+  const effects = rawEq.map(eq => {
+    if (eq.type === 'saturation') {
+      return { type: 'saturation', drive: eq.drive || eq.gain || 0.1 };
+    }
+    const typeMap = {
+      'peaking': 'peaking_eq', 'peaking_eq': 'peaking_eq',
+      'low_shelf': 'low_shelf', 'high_shelf': 'peaking_eq',
+      'high_pass': 'peaking_eq', 'low_pass': 'peaking_eq',
+    };
+    return {
+      type: typeMap[eq.type] || 'peaking_eq',
+      freq: eq.freq || 1000,
+      gain: eq.gain || 0,
+      Q: eq.Q || 0.8,
+    };
+  }).filter(e => e.gain !== 0 || e.type === 'saturation');
+
+  if (effects.length === 0) return null;
+
+  const resp = await fetch(`${API}/demo/process`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ effects, intensity: 1.0 }), // intensity 1.0 = use LLM values as-is
+  });
+  if (!resp.ok) return null;
+  const data = await resp.json();
+  return data.audio_url;
+}
+
+async function renderAudioForResponse(res) {
+  // Build effects list from LLM response concepts
+  const concepts = res.concepts || [];
+  const effects = [];
+  const intensity = res.confidence || 0.6;
+
+  // 200+ concept→DSP mappings (based on iZotope/Audio Issues EQ reference)
+  const P = (f,g,q=0.8) => ({type:'peaking_eq',freq:f,gain:g,Q:q});
+  const LS = (f,g) => ({type:'low_shelf',freq:f,gain:g});
+  const SAT = (d) => ({type:'saturation',drive:d});
+  const conceptMap = {
+    // ── Warmth / Body / Fullness ──
+    warm:[P(280,2.0),LS(150,1.5)], hot:[P(250,3.0,0.7),LS(120,2.5)],
+    analog:[P(250,2.5,0.7),LS(120,2.0)], vintage:[P(300,2.0),P(8000,-1.0,0.7)],
+    tape:[P(250,1.5),SAT(0.06)], tube:[P(300,2.0,0.7),SAT(0.08)],
+    fat:[P(200,3.0,0.6),LS(100,2.0)], thick:[P(200,3.5,0.6),LS(80,2.5)],
+    full:[P(250,2.5,0.7),LS(120,1.5)], round:[P(200,2.0,0.6),P(3000,-1.0,1.0)],
+    body:[P(250,3.0,0.7),LS(120,2.0)], rich:[P(300,2.5,0.7),LS(150,2.0),P(8000,1.0,0.6)],
+    lush:[P(300,2.0),P(6000,1.5,0.6),LS(150,1.5)], creamy:[P(250,2.0,0.6),P(4000,-1.5,1.0)],
+    dark:[P(8000,-2.5,0.6),P(4000,-1.5,0.8),LS(200,1.5)],
+    mellow:[P(3000,-1.5,0.8),P(8000,-1.0,0.7),LS(200,1.0)],
+    cozy:[P(250,2.0,0.7),P(6000,-1.0,0.7),LS(120,1.5)],
+    saturation:[SAT(0.1)], overdrive:[SAT(0.2)], distortion:[SAT(0.3)],
+    grit:[P(2000,2.0,1.2),SAT(0.15)], edge:[P(3000,2.5,1.0),SAT(0.1)],
+    dirt:[P(500,1.5,0.8),SAT(0.12)], lo_fi:[P(8000,-3.0,0.5),P(100,-2.0,0.8),SAT(0.08)],
+    retro:[P(300,2.0,0.7),P(8000,-2.0,0.6),SAT(0.06)],
+
+    // ── Brightness / Air / Sparkle ──
+    bright:[P(3000,2.5,1.0),P(8000,1.5,0.7)], brilliant:[P(8000,3.0,0.6),P(12000,2.0,0.7)],
+    crisp:[P(5000,2.0,1.0),P(10000,1.5,0.7)], sharp:[P(4000,3.0,1.2),P(8000,2.0,0.8)],
+    airy:[P(10000,2.5,0.6),P(14000,1.5,0.7)], open:[P(6000,2.0,0.6),P(10000,1.5,0.7)],
+    sparkle:[P(10000,2.0,0.7),P(14000,2.0,0.6)], shimmer:[P(8000,2.0,0.7),P(12000,1.5,0.6)],
+    sizzle:[P(8000,3.0,0.8),P(12000,2.0,0.7)], glassy:[P(5000,2.5,1.0),P(10000,2.0,0.7)],
+    shiny:[P(6000,2.0,0.8),P(10000,1.5,0.6)], clarity:[P(3000,2.0,1.0),P(300,-1.5,0.8)],
+    definition:[P(2500,2.5,1.2),P(5000,1.5,0.8)], detail:[P(4000,2.0,1.0),P(8000,1.5,0.7)],
+    transparent:[P(300,-1.0,0.8),P(5000,1.0,1.0)], clean:[P(300,-1.0,0.8),P(5000,1.0,1.0)],
+    modern:[P(3000,2.0,1.0),P(100,2.0,0.8),P(8000,1.5,0.7)],
+
+    // ── Presence / Forward / Upfront ──
+    presence:[P(2500,3.0,1.0)], forward:[P(2000,3.0,0.8),P(4000,2.0,1.0)],
+    upfront:[P(2500,3.5,1.0),P(1000,1.5,0.8)], intimate:[P(2000,2.5,0.8),P(8000,-0.5,0.7)],
+    in_your_face:[P(2500,4.0,1.0),P(100,2.0,0.8)],
+    aggressive:[P(2000,3.0,1.0),SAT(0.12)], powerful:[P(100,3.0,0.6),P(2500,2.5,1.0)],
+    intense:[P(2000,3.5,1.0),P(100,2.5,0.7),SAT(0.08)],
+    energy:[P(2500,2.5,1.0),P(100,2.0,0.8),P(8000,1.5,0.7)],
+
+    // ── Punch / Impact / Attack ──
+    punch:[P(100,3.0,0.8),P(2500,2.0,1.2)], impact:[P(80,3.5,0.7),P(2000,2.5,1.0)],
+    attack:[P(3000,3.0,1.5),P(5000,2.0,1.0)], snap:[P(4000,3.5,1.5),P(8000,1.5,0.8)],
+    tight:[P(100,2.0,1.5),P(300,-1.5,1.0)], slam:[P(60,4.0,0.6),P(2500,3.0,1.0)],
+    heavy:[P(80,3.5,0.6),LS(60,3.0)], massive:[P(60,4.0,0.5),LS(40,3.0),P(2500,2.0,1.0)],
+    thunder:[P(60,4.5,0.5),LS(40,3.5)], boom:[P(80,4.0,0.6),LS(60,2.5)],
+
+    // ── Space / Depth / Width ──
+    spacious:[P(6000,-0.8,0.7),P(10000,1.0,0.6)],
+    wide:[P(6000,1.5,0.6),P(10000,1.0,0.6)], wide_stereo:[P(6000,1.5,0.6)],
+    narrow:[P(6000,-1.5,0.6),P(300,1.0,0.8)],
+    room:[P(8000,-1.5,0.7),LS(80,0.5)], hall:[P(8000,-2.0,0.6),LS(100,1.0),P(2000,-0.5,0.8)],
+    cathedral:[P(8000,-2.5,0.5),LS(100,1.5),P(2000,-1.0,0.7)],
+    arena:[P(300,1.5,0.6),P(8000,-1.5,0.6),LS(80,1.0)],
+    stadium:[P(200,2.0,0.5),P(8000,-2.0,0.5),LS(60,1.5)],
+    outdoor:[P(300,-1.0,0.8),P(8000,-2.0,0.6),P(5000,-1.0,0.8)],
+    depth:[P(2000,-1.0,0.8),P(8000,-1.5,0.7),LS(150,1.0)],
+    three_d:[P(6000,1.5,0.6),P(2000,-0.5,0.8),P(10000,1.0,0.7)],
+    reverb:[P(8000,-1.0,0.7),LS(100,0.5)], echo:[P(6000,-1.0,0.7),P(1000,0.5,0.8)],
+    ambient:[P(8000,-1.0,0.6),P(10000,1.0,0.6),LS(100,0.5)],
+    live:[P(300,1.5,0.6),P(8000,-1.0,0.7),LS(80,1.0),P(2500,1.0,0.8)],
+    concert:[P(300,2.0,0.6),P(8000,-1.5,0.6),LS(80,1.5),P(2500,1.5,0.8)],
+    concert_hall:[P(300,2.0,0.5),P(8000,-2.0,0.6),LS(100,1.5)],
+    jazz_club:[P(300,2.5,0.7),P(8000,-1.5,0.7),P(2000,1.0,0.8),LS(120,1.5)],
+    center_seat:[P(2500,1.5,0.8),P(300,1.0,0.7),P(8000,-0.5,0.7)],
+    front_row:[P(2500,3.0,1.0),P(100,2.0,0.7),P(8000,1.0,0.7)],
+    balcony:[P(8000,-2.0,0.6),P(2000,-1.0,0.8),LS(150,1.5)],
+    studio:[P(3000,1.0,1.0),P(300,-0.5,0.8),P(8000,0.5,0.7)],
+
+    // ── Smooth / Soft / Gentle ──
+    smooth:[P(4000,-1.5,1.0),LS(200,1.0)], soft:[P(3000,-1.0,0.8),P(8000,-1.0,0.7)],
+    silky:[P(4000,-1.0,0.8),P(10000,1.0,0.6),LS(200,0.5)],
+    gentle:[P(3000,-0.5,0.8),P(8000,-0.5,0.7)], delicate:[P(4000,-1.0,1.0),P(10000,1.5,0.6)],
+    subtle:[P(2500,1.0,1.0)], natural:[P(300,0.5,0.7),P(5000,0.5,0.8)],
+    organic:[P(300,1.0,0.7),P(8000,-0.5,0.7),LS(100,0.5)],
+    neutral:[P(1000,0.5,0.8)], flat:[],
+    polished:[P(3000,1.5,1.0),P(300,-0.5,0.8),P(8000,1.0,0.7)],
+
+    // ── Vocal Processing ──
+    vocal_presence:[P(2500,3.5,1.0),P(5000,2.0,0.8)],
+    vocal_clarity:[P(3000,3.0,1.2),P(200,-1.5,0.8)],
+    vocal_warmth:[P(300,2.0,0.8),P(200,1.5,0.7),P(4000,-0.5,1.0)],
+    vocal_air:[P(10000,2.5,0.6),P(14000,1.5,0.7),P(200,-1.0,0.8)],
+    vocal_boost:[P(2500,3.0,1.0),P(5000,2.0,0.8),P(200,-1.0,0.8)],
+    vocal_forward:[P(2000,3.5,0.8),P(4000,2.0,1.0)],
+    vocal_intimate:[P(2000,2.5,0.8),P(8000,-0.5,0.7),P(300,1.0,0.7)],
+    de_ess:[P(6000,-3.0,2.0),P(8000,-2.0,1.5)],
+    de_sibilance:[P(6500,-3.5,2.0),P(9000,-2.0,1.5)],
+
+    // ── Instrument-specific ──
+    guitar_presence:[P(2500,2.5,1.0),P(5000,1.5,0.8)],
+    guitar_warmth:[P(300,2.0,0.8),P(8000,-1.0,0.7)],
+    guitar_twang:[P(2000,3.0,1.5),P(4000,2.0,1.0)],
+    guitar_crunch:[P(2500,2.5,1.0),SAT(0.1)],
+    acoustic_guitar:[P(200,1.5,0.8),P(5000,2.0,0.8),P(300,-1.0,1.5)],
+    electric_guitar:[P(2500,2.5,1.0),P(800,1.5,0.8),SAT(0.08)],
+    bass_boost:[LS(80,3.0),P(100,2.5,0.8)], bass_punch:[P(80,3.0,1.0),P(800,2.0,1.2)],
+    bass_warmth:[P(200,2.5,0.7),LS(80,2.0)], bass_clarity:[P(800,2.5,1.2),P(200,-1.0,0.8)],
+    sub_bass:[LS(40,4.0),P(60,3.0,0.8)],
+    kick_punch:[P(60,3.5,1.0),P(3000,2.5,1.5)], kick_click:[P(4000,3.0,1.5),P(8000,2.0,1.0)],
+    kick_boom:[P(60,4.0,0.6),LS(40,3.0)], kick_tight:[P(60,2.0,1.5),P(300,-2.0,1.0)],
+    snare_crack:[P(2000,3.0,1.5),P(5000,2.0,1.0)],
+    snare_body:[P(200,2.5,0.8),P(1000,1.5,0.8)],
+    snare_snap:[P(4000,3.5,1.5),P(8000,2.0,1.0)],
+    hi_hat_sparkle:[P(8000,2.5,0.8),P(12000,2.0,0.7)],
+    hi_hat_sizzle:[P(10000,3.0,0.8),P(14000,2.0,0.7)],
+    cymbal_wash:[P(6000,2.0,0.6),P(10000,1.5,0.6),P(300,-1.0,0.8)],
+    drums_punch:[P(80,3.0,0.8),P(3000,2.5,1.2)],
+    drums_room:[P(300,1.5,0.6),P(8000,-1.5,0.7),LS(80,1.0)],
+    piano_warmth:[P(300,2.0,0.7),P(5000,1.0,0.8),LS(120,1.5)],
+    piano_clarity:[P(3000,2.5,1.0),P(200,-1.0,0.8)],
+    piano_brilliance:[P(5000,2.5,0.8),P(8000,2.0,0.7)],
+    strings_lush:[P(500,2.0,0.6),P(3000,1.5,0.8),LS(200,1.5)],
+    strings_bite:[P(3000,3.0,1.2),P(5000,2.0,1.0)],
+    strings_warmth:[P(300,2.5,0.7),P(8000,-1.0,0.7),LS(150,1.5)],
+    brass_bite:[P(2500,3.0,1.0),P(5000,2.0,0.8)],
+    brass_warmth:[P(500,2.0,0.7),P(8000,-1.5,0.7)],
+    horn_presence:[P(2000,2.5,1.0),P(4000,1.5,0.8)],
+    synth_pad:[P(500,1.5,0.6),P(8000,1.0,0.6),LS(150,1.0)],
+    synth_lead:[P(2500,3.0,1.0),P(5000,2.0,0.8)],
+    synth_bass:[LS(60,3.5),P(100,3.0,0.8),P(2000,1.5,1.0)],
+    organ_warmth:[P(400,2.5,0.7),LS(200,2.0)],
+    flute_air:[P(8000,2.0,0.7),P(4000,1.5,0.8)],
+    saxophone_body:[P(500,2.5,0.7),P(2500,2.0,1.0)],
+    cello_richness:[P(300,2.5,0.7),P(1000,1.5,0.8),LS(120,1.5)],
+    violin_shimmer:[P(5000,2.0,0.8),P(8000,2.0,0.7)],
+
+    // ── Problem-solving / Corrective ──
+    de_mud:[P(300,-3.0,1.5)], de_muddy:[P(300,-3.0,1.5)],
+    de_harsh:[P(3000,-2.5,1.5)], de_harshness:[P(3000,-2.5,1.5)],
+    de_boom:[P(80,-3.0,1.0)], de_boxy:[P(400,-3.0,1.5)],
+    de_nasal:[P(1000,-3.0,2.0)], de_honk:[P(800,-3.0,1.5)],
+    de_tinny:[P(3000,-2.0,1.5),LS(200,1.5)],
+    remove_rumble:[P(40,-4.0,0.8),P(60,-2.0,1.0)],
+    remove_hiss:[P(8000,-3.0,0.6),P(12000,-3.0,0.7)],
+    remove_boxiness:[P(400,-3.5,1.5)],
+    fix_thin:[P(250,3.0,0.7),LS(120,2.0)],
+    fix_dull:[P(5000,2.5,0.8),P(8000,2.0,0.7)],
+    fix_boomy:[P(80,-3.0,0.8),P(120,-2.0,1.0)],
+    fix_harsh:[P(3000,-2.0,1.5),P(5000,-1.5,1.0)],
+
+    // ── Genre / Style / Vibe ──
+    radio_ready:[P(3000,2.0,1.0),P(100,2.0,0.8),P(8000,1.5,0.7),P(300,-1.0,0.8)],
+    broadcast:[P(2500,2.5,1.0),P(100,1.5,0.8),P(8000,1.0,0.7)],
+    cinematic:[P(100,2.5,0.6),P(8000,-1.0,0.6),LS(60,2.0),P(2000,1.0,0.8)],
+    epic:[P(60,3.5,0.5),P(2500,2.5,1.0),LS(40,3.0),P(8000,1.0,0.6)],
+    orchestral:[P(300,1.5,0.6),P(5000,1.5,0.8),LS(100,1.5)],
+    chamber:[P(2000,1.5,0.8),P(8000,-0.5,0.7),P(300,1.0,0.7)],
+    jazz:[P(300,2.0,0.7),P(2500,1.5,1.0),P(8000,-1.0,0.7),LS(120,1.5)],
+    blues:[P(300,2.5,0.7),P(2000,2.0,0.8),SAT(0.06)],
+    rock:[P(100,2.5,0.8),P(3000,2.5,1.0),P(8000,1.5,0.7)],
+    metal:[P(80,3.0,0.8),P(3000,3.0,1.0),P(8000,2.0,0.7),SAT(0.1)],
+    pop:[P(3000,2.0,1.0),P(100,2.0,0.8),P(8000,1.5,0.7)],
+    rnb:[P(200,2.5,0.7),P(2500,2.0,1.0),LS(100,2.0)],
+    hiphop:[P(60,3.5,0.6),LS(40,3.0),P(3000,2.0,1.0)],
+    edm:[P(60,4.0,0.6),P(3000,2.5,1.0),P(8000,2.0,0.7),LS(40,3.0)],
+    acoustic:[P(200,1.5,0.8),P(5000,2.0,0.8),P(300,-1.0,1.5)],
+    unplugged:[P(300,1.5,0.7),P(5000,1.5,0.8),P(8000,-0.5,0.7)],
+    lounge:[P(300,2.0,0.7),P(8000,-1.0,0.7),P(2000,1.0,0.8),LS(120,1.0)],
+    chill:[P(300,1.5,0.7),P(8000,-1.5,0.7),LS(100,1.0)],
+    dreamy:[P(8000,1.5,0.5),P(300,1.5,0.6),P(4000,-0.5,0.8)],
+    ethereal:[P(10000,2.0,0.5),P(6000,1.5,0.6),P(300,-0.5,0.8)],
+    psychedelic:[P(2000,2.0,0.6),P(8000,2.0,0.6),SAT(0.08)],
+
+    // ── Creative / Descriptive ──
+    telephone:[P(300,-4.0,0.5),P(4000,-4.0,0.5),P(1000,3.0,1.5)],
+    underwater:[P(8000,-5.0,0.4),P(4000,-3.0,0.5),LS(200,2.0)],
+    radio:[P(300,-3.0,0.6),P(5000,-3.0,0.6),P(1500,2.0,1.0)],
+    megaphone:[P(300,-3.0,0.5),P(5000,-3.0,0.5),P(1000,4.0,1.5)],
+    vinyl:[P(8000,-2.0,0.6),P(100,-1.0,0.8),SAT(0.04),LS(200,1.0)],
+    cassette:[P(8000,-3.0,0.5),SAT(0.06),LS(200,1.5)],
+    am_radio:[P(200,-3.0,0.6),P(5000,-4.0,0.5),P(1000,3.0,1.2)],
+
+    // ── Frequency-specific ──
+    low_end:[LS(80,3.0),P(100,2.0,0.8)], low_mid:[P(250,3.0,0.7)],
+    mid:[P(1000,2.5,0.8)], mid_range:[P(1000,2.5,0.8)],
+    upper_mid:[P(3000,2.5,1.0)], high_end:[P(8000,2.5,0.7),P(12000,1.5,0.6)],
+    treble:[P(8000,2.0,0.7),P(10000,1.5,0.7)],
+    bass:[LS(80,3.0),P(100,2.5,0.8)], sub:[LS(40,4.0),P(60,3.0,0.8)],
+    highs:[P(8000,2.0,0.7),P(12000,1.5,0.6)], lows:[LS(100,2.5),P(80,2.0,0.8)],
+    mids:[P(1000,2.0,0.8),P(2000,1.5,0.8)],
+
+    // ── Dynamic / Compression feel ──
+    compressed:[P(300,1.0,0.8),P(3000,1.5,1.0)],
+    dynamic:[P(100,1.5,0.8),P(8000,1.5,0.7)],
+    squashed:[P(300,1.5,0.7),P(3000,2.0,1.0),SAT(0.06)],
+    pumping:[P(100,3.0,0.8),P(2000,-1.0,0.8)],
+    breathing:[P(300,1.0,0.7),P(5000,1.0,0.8)],
+    glued:[P(300,1.0,0.7),P(2000,1.0,0.8),SAT(0.04)],
+
+    // ── Width / Imaging ──
+    centered:[P(300,1.0,0.8),P(6000,-1.0,0.7)],
+    mono:[P(300,0.5,0.8)], stereo:[P(6000,1.5,0.6),P(10000,1.0,0.6)],
+    separated:[P(3000,1.5,1.0),P(300,-1.0,0.8),P(8000,1.0,0.7)],
+    blended:[P(2000,-0.5,0.8),P(300,1.0,0.7)],
+  };
+
+  let matched = false;
+  for (const c of concepts) {
+    const key = c.toLowerCase().replace(/[- ]/g, '_');
+    // Exact match first
+    if (conceptMap[key]) {
+      effects.push(...conceptMap[key]);
+      matched = true;
+    } else {
+      // Partial match: try splitting key and matching parts
+      // e.g. "hall_large" → try "hall", "vocal_presence" → try "vocal_presence" then "vocal"
+      const parts = key.split('_');
+      for (let i = parts.length; i > 0; i--) {
+        const partial = parts.slice(0, i).join('_');
+        if (conceptMap[partial]) {
+          effects.push(...conceptMap[partial]);
+          matched = true;
+          break;
+        }
+      }
+      // Also try last part: "hall_large" → "large" won't help, but "bass_deep" → "bass" might
+      if (!matched && parts.length > 1 && conceptMap[parts[parts.length - 1]]) {
+        effects.push(...conceptMap[parts[parts.length - 1]]);
+        matched = true;
+      }
+    }
+  }
+
+  // Fallback: use raw_eq from LLM if concept didn't match
+  if (!matched && res.raw_eq && Array.isArray(res.raw_eq)) {
+    for (const eq of res.raw_eq) {
+      const type = eq.type === 'low_shelf' ? 'low_shelf'
+        : eq.type === 'high_shelf' ? 'peaking_eq'
+        : eq.type === 'saturation' ? 'saturation' : 'peaking_eq';
+      if (type === 'saturation') {
+        effects.push({ type: 'saturation', drive: eq.drive || 0.1 });
+      } else {
+        effects.push({ type, freq: eq.freq || 1000, gain: eq.gain || 2.0, Q: eq.Q || 0.8 });
+      }
+    }
+  }
+
+  // Final fallback: generic mid-boost
+  if (effects.length === 0) {
+    effects.push({ type: 'peaking_eq', freq: 1000, gain: 2.0, Q: 0.8 });
+  }
+
+  const resp = await fetch(`${API}/demo/process`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ effects, intensity }),
+  });
+  if (!resp.ok) return null;
+  const data = await resp.json();
+  return data.audio_url;
+}
+
+let audioCounter = 0;
+function addLiveResponse(panelId, res, userId, audioFile) {
+  const panel = document.getElementById(panelId);
+  const div = document.createElement('div');
+  div.style.cssText = 'font-size:0.8rem;margin:0.4rem 0;line-height:1.5';
+
+  const safetyBadge = '';
+
+  const concepts = (res.concepts || []).join(', ') || '—';
+  const confidence = ((res.confidence || 0) * 100).toFixed(0);
+
+  const audioId = `live_audio_${audioCounter++}`;
+  const audioHtml = audioFile
+    ? `<div style="margin-top:0.3rem">
+        <audio id="${audioId}" src="${audioFile}" preload="auto"></audio>
+        <button class="play-btn" style="font-size:0.7rem;padding:0.2rem 0.6rem" onclick="toggleLiveAudio('${audioId}',this)">🔊 결과 듣기</button>
+       </div>`
+    : '';
+
+  div.innerHTML = `
+    ${safetyBadge}<strong>${res.explanation || '—'}</strong>
+    <div style="font-family:'JetBrains Mono',monospace;font-size:0.7rem;color:var(--text-dim);background:rgba(0,0,0,0.3);border-radius:4px;padding:0.4rem;margin-top:0.3rem">
+      concepts: ${concepts}<br>
+      confidence: ${confidence}%
+    </div>
+    ${audioHtml}
+  `;
+  panel.appendChild(div);
+  panel.scrollTop = panel.scrollHeight;
+}
+
+function toggleLiveAudio(audioId, btn) {
+  // Stop all other live audios
+  document.querySelectorAll('[id^="live_audio_"]').forEach(el => {
+    if (el.id !== audioId) { el.pause(); el.currentTime = 0; }
+  });
+
+  const audio = document.getElementById(audioId);
+  if (!audio) return;
+  if (audio.paused) {
+    audio.play();
+    btn.textContent = '⏸ 정지';
+    btn.classList.add('playing');
+    audio.onended = () => { btn.textContent = '🔊 결과 듣기'; btn.classList.remove('playing'); };
+  } else {
+    audio.pause();
+    btn.textContent = '🔊 결과 듣기';
+    btn.classList.remove('playing');
+  }
+}
+
+async function liveFeedback(userId, concept, feedback, btn) {
+  if (!concept || concept === '—') return;
+  if (btn.classList.contains('selected')) { btn.classList.remove('selected'); return; }
+  btn.parentElement.querySelectorAll('.fb-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+
+  try {
+    await fetch(`${API}/users/${userId}/feedback`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ user_id: userId, concept, feedback }),
+    });
+    updateLiveProfiles();
+  } catch {}
+}
+</script>
+</body>
+</html>

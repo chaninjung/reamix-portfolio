@@ -1,0 +1,897 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ReaMix AI — Portfolio | Chanin Jung</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+  :root {
+    --bg: #0a0a0f;
+    --surface: #12121a;
+    --surface2: #1a1a28;
+    --border: #2a2a3a;
+    --text: #e4e4ef;
+    --text-dim: #8888a0;
+    --accent: #6c63ff;
+    --accent2: #00d4aa;
+    --accent3: #ff6b6b;
+    --accent4: #ffd93d;
+    --glow: rgba(108, 99, 255, 0.15);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.7;
+    overflow-x: hidden;
+  }
+
+  /* Hero */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 2rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero::before {
+    content: '';
+    position: absolute;
+    width: 600px; height: 600px;
+    background: radial-gradient(circle, var(--glow) 0%, transparent 70%);
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+  }
+
+  .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    padding: 0.4rem 1rem;
+    font-size: 0.85rem;
+    color: var(--accent2);
+    margin-bottom: 2rem;
+  }
+
+  .hero-badge .dot {
+    width: 8px; height: 8px;
+    background: var(--accent2);
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+
+  .hero h1 {
+    font-size: clamp(2.5rem, 6vw, 4.5rem);
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    margin-bottom: 1rem;
+    background: linear-gradient(135deg, var(--text) 0%, var(--accent) 50%, var(--accent2) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .hero p {
+    font-size: 1.2rem;
+    color: var(--text-dim);
+    max-width: 600px;
+    margin-bottom: 3rem;
+  }
+
+  .hero-stats {
+    display: flex;
+    gap: 3rem;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .stat {
+    text-align: center;
+  }
+
+  .stat-value {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--accent);
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .stat-label {
+    font-size: 0.85rem;
+    color: var(--text-dim);
+    margin-top: 0.25rem;
+  }
+
+  /* Sections */
+  section {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 6rem 2rem;
+  }
+
+  .section-label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--accent);
+    margin-bottom: 0.75rem;
+  }
+
+  .section-title {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    letter-spacing: -0.02em;
+  }
+
+  .section-desc {
+    color: var(--text-dim);
+    max-width: 650px;
+    margin-bottom: 3rem;
+    font-size: 1.05rem;
+  }
+
+  /* Architecture */
+  .arch-flow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-bottom: 3rem;
+  }
+
+  .arch-node {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1rem 1.5rem;
+    text-align: center;
+    min-width: 120px;
+    transition: all 0.3s;
+  }
+
+  .arch-node:hover {
+    border-color: var(--accent);
+    box-shadow: 0 0 20px var(--glow);
+    transform: translateY(-2px);
+  }
+
+  .arch-node .icon { font-size: 1.5rem; margin-bottom: 0.3rem; }
+  .arch-node .label { font-size: 0.85rem; font-weight: 500; }
+  .arch-arrow { color: var(--text-dim); font-size: 1.2rem; }
+
+  /* Feature cards */
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .feature-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 2rem;
+    transition: all 0.3s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .feature-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  .feature-card:hover {
+    border-color: var(--accent);
+    transform: translateY(-4px);
+    box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+  }
+
+  .feature-card:hover::before { opacity: 1; }
+
+  .feature-icon {
+    width: 48px; height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .feature-card h3 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+  }
+
+  .feature-card p {
+    color: var(--text-dim);
+    font-size: 0.9rem;
+  }
+
+  .feature-tag {
+    display: inline-block;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 0.2rem 0.6rem;
+    font-size: 0.75rem;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--accent2);
+    margin-top: 0.75rem;
+    margin-right: 0.3rem;
+  }
+
+  /* Demo: Personalisation */
+  .demo-container {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+    margin-top: 2rem;
+  }
+
+  .demo-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface2);
+  }
+
+  .demo-dot {
+    width: 12px; height: 12px;
+    border-radius: 50%;
+  }
+
+  .demo-content {
+    padding: 2rem;
+  }
+
+  .demo-query {
+    text-align: center;
+    margin-bottom: 2rem;
+  }
+
+  .demo-query .prompt {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 1.3rem;
+    color: var(--accent4);
+    margin-bottom: 0.5rem;
+  }
+
+  .demo-query .subtitle {
+    color: var(--text-dim);
+    font-size: 0.9rem;
+  }
+
+  .demo-users {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+  }
+
+  @media (max-width: 600px) {
+    .demo-users { grid-template-columns: 1fr; }
+  }
+
+  .demo-user {
+    background: var(--bg);
+    border-radius: 12px;
+    padding: 1.5rem;
+    border: 1px solid var(--border);
+  }
+
+  .demo-user-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+  }
+
+  .demo-avatar {
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 0.9rem;
+  }
+
+  .demo-user-name { font-weight: 600; }
+  .demo-user-style { font-size: 0.8rem; color: var(--text-dim); }
+
+  .demo-params {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.8rem;
+    line-height: 1.8;
+  }
+
+  .demo-params .param-name { color: var(--accent2); }
+  .demo-params .param-value { color: var(--accent4); }
+  .demo-params .param-comment { color: var(--text-dim); }
+
+  /* API */
+  .api-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1rem;
+  }
+
+  .api-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.25rem;
+    transition: all 0.3s;
+  }
+
+  .api-item:hover {
+    border-color: var(--accent);
+  }
+
+  .api-method {
+    display: inline-block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 0.15rem 0.5rem;
+    border-radius: 4px;
+    margin-right: 0.5rem;
+  }
+
+  .api-method.get { background: rgba(0, 212, 170, 0.15); color: var(--accent2); }
+  .api-method.post { background: rgba(108, 99, 255, 0.15); color: var(--accent); }
+  .api-method.put { background: rgba(255, 217, 61, 0.15); color: var(--accent4); }
+  .api-method.delete { background: rgba(255, 107, 107, 0.15); color: var(--accent3); }
+
+  .api-path {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.85rem;
+  }
+
+  .api-desc {
+    color: var(--text-dim);
+    font-size: 0.8rem;
+    margin-top: 0.5rem;
+  }
+
+  /* Tech Stack */
+  .tech-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+
+  .tech-pill {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    padding: 0.5rem 1.25rem;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: all 0.3s;
+    cursor: default;
+  }
+
+  .tech-pill:hover {
+    border-color: var(--accent);
+    background: var(--surface2);
+  }
+
+  /* Test results */
+  .test-bar {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.5rem 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 2rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .test-bar .count {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--accent2);
+  }
+
+  .test-bar .pass {
+    font-size: 0.9rem;
+    color: var(--text-dim);
+  }
+
+  .test-progress {
+    width: 200px;
+    height: 8px;
+    background: var(--surface2);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .test-progress-fill {
+    height: 100%;
+    width: 100%;
+    background: linear-gradient(90deg, var(--accent2), var(--accent));
+    border-radius: 4px;
+  }
+
+  /* Footer */
+  footer {
+    text-align: center;
+    padding: 3rem 2rem;
+    color: var(--text-dim);
+    font-size: 0.85rem;
+    border-top: 1px solid var(--border);
+  }
+
+  footer a {
+    color: var(--accent);
+    text-decoration: none;
+  }
+
+  /* CTA button */
+  .cta-btn {
+    display: inline-block;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    color: white;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 1.1rem;
+    padding: 0.9rem 2.5rem;
+    border-radius: 12px;
+    transition: all 0.3s;
+    box-shadow: 0 4px 20px rgba(108, 99, 255, 0.3);
+  }
+
+  .cta-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px rgba(108, 99, 255, 0.5);
+  }
+
+  /* Typing animation demo */
+  .typing-demo {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 2rem;
+    margin-top: 2rem;
+    max-width: 700px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .typing-input {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 1.1rem;
+    color: var(--accent4);
+    margin-bottom: 1rem;
+    min-height: 1.5em;
+  }
+
+  .typing-cursor {
+    display: inline-block;
+    width: 2px;
+    height: 1.2em;
+    background: var(--accent4);
+    vertical-align: text-bottom;
+    animation: blink 1s infinite;
+  }
+
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+  }
+
+  .typing-output {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.85rem;
+    color: var(--accent2);
+    opacity: 0;
+    transition: opacity 0.5s;
+    line-height: 1.8;
+  }
+
+  .typing-output.visible { opacity: 1; }
+
+  /* Scroll animation */
+  .fade-in {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: all 0.6s ease-out;
+  }
+
+  .fade-in.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+</style>
+</head>
+<body>
+
+<!-- Hero -->
+<div class="hero">
+  <div class="hero-badge">
+    <span class="dot"></span>
+    Personal Project
+  </div>
+  <h1>ReaMix AI</h1>
+  <p>자연어로 오디오를 믹싱하는 AI 어시스턴트.<br>
+  "로우미드 살려서 바디감 줘" 한마디로 REAPER DAW를 제어합니다.<br>
+  <strong>유저별로 같은 말을 다르게 해석하는 개인화 엔진 탑재.</strong></p>
+  <a href="demo.html" class="cta-btn">Live Demo 체험하기 →</a>
+  <div style="margin-bottom:2rem"></div>
+  <div class="hero-stats">
+    <div class="stat">
+      <div class="stat-value">216</div>
+      <div class="stat-label">Tests Passing</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value">333</div>
+      <div class="stat-label">Mixing Concepts</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value">23</div>
+      <div class="stat-label">API Endpoints</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value">8</div>
+      <div class="stat-label">Core Modules</div>
+    </div>
+  </div>
+</div>
+
+<!-- Typing Demo -->
+<section class="fade-in">
+  <div class="section-label">How It Works</div>
+  <div class="section-title">자연어 한 줄이 믹싱이 됩니다</div>
+  <div class="typing-demo">
+    <div class="typing-input" id="typingInput"><span class="typing-cursor"></span></div>
+    <div class="typing-output" id="typingOutput"></div>
+  </div>
+</section>
+
+<!-- Architecture -->
+<section class="fade-in">
+  <div class="section-label">Architecture</div>
+  <div class="section-title">End-to-End Pipeline</div>
+  <div class="section-desc">사용자의 자연어 요청이 LLM을 거쳐 REAPER Lua 코드로 변환되어 실시간으로 실행됩니다.</div>
+
+  <div class="arch-flow">
+    <div class="arch-node"><div class="icon">🎤</div><div class="label">Natural Language</div></div>
+    <div class="arch-arrow">→</div>
+    <div class="arch-node"><div class="icon">🧠</div><div class="label">Query Parser</div></div>
+    <div class="arch-arrow">→</div>
+    <div class="arch-node"><div class="icon">🔍</div><div class="label">Embedding Match</div></div>
+    <div class="arch-arrow">→</div>
+    <div class="arch-node"><div class="icon">🤖</div><div class="label">LLM (Claude/Gemini)</div></div>
+    <div class="arch-arrow">→</div>
+    <div class="arch-node"><div class="icon">📜</div><div class="label">Lua Generator</div></div>
+    <div class="arch-arrow">→</div>
+    <div class="arch-node"><div class="icon">🎛️</div><div class="label">REAPER DAW</div></div>
+  </div>
+</section>
+
+<!-- Personalisation Demo -->
+<section class="fade-in">
+  <div class="section-label">Core Feature</div>
+  <div class="section-title">유저별 개인화 — 같은 말, 다른 해석</div>
+  <div class="section-desc">같은 "로우미드 살려줘"라는 요청도 유저의 과거 대화 맥락에 따라 다른 파라미터로 해석됩니다. STM/LTM 메모리 + EMA 선호도 추적 기반.</div>
+
+  <div class="demo-container">
+    <div class="demo-header">
+      <div class="demo-dot" style="background:#ff5f57"></div>
+      <div class="demo-dot" style="background:#febc2e"></div>
+      <div class="demo-dot" style="background:#28c840"></div>
+      <span style="color:var(--text-dim); font-size:0.85rem; margin-left:0.5rem;">ReaMix AI — Personalisation Engine</span>
+    </div>
+    <div class="demo-content">
+      <div class="demo-query">
+        <div class="prompt">"로우미드 살려서 바디감 좀 줘"</div>
+        <div class="subtitle">동일한 요청, 두 명의 유저 — 다른 결과</div>
+      </div>
+      <div class="demo-users">
+        <div class="demo-user">
+          <div class="demo-user-header">
+            <div class="demo-avatar" style="background:rgba(108,99,255,0.2); color:var(--accent)">A</div>
+            <div>
+              <div class="demo-user-name">User A</div>
+              <div class="demo-user-style">Style: natural/transparent</div>
+            </div>
+          </div>
+          <div class="demo-params">
+            <span class="param-comment">// 과거: "살짝만", "1.5dB만" 등 절제된 요청 5회</span><br>
+            <span class="param-name">ReaEQ</span> low_mid: <span class="param-value">+1.5dB</span> <span class="param-comment">@ 280Hz (Q 0.8)</span><br>
+            <span class="param-name">Low Shelf</span>: <span class="param-value">+1.0dB</span> <span class="param-comment">@ 120Hz</span><br>
+            <span class="param-comment">→ 절제된 내추럴 톤</span>
+          </div>
+        </div>
+        <div class="demo-user">
+          <div class="demo-user-header">
+            <div class="demo-avatar" style="background:rgba(255,107,107,0.2); color:var(--accent3)">B</div>
+            <div>
+              <div class="demo-user-name">User B</div>
+              <div class="demo-user-style">Style: analog/colored</div>
+            </div>
+          </div>
+          <div class="demo-params">
+            <span class="param-comment">// 과거: "확실하게", "4dB 부스트" 등 적극적 요청 5회</span><br>
+            <span class="param-name">ReaEQ</span> low_mid: <span class="param-value">+4.5dB</span> <span class="param-comment">@ 250Hz (Q 0.6)</span><br>
+            <span class="param-name">Low Shelf</span>: <span class="param-value">+3.0dB</span> <span class="param-comment">@ 120Hz</span><br>
+            <span class="param-name">HF Rolloff</span>: <span class="param-value">−1.5dB</span> <span class="param-comment">@ 6kHz</span><br>
+            <span class="param-comment">→ 풍성한 아날로그 톤</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Features -->
+<section class="fade-in">
+  <div class="section-label">Features</div>
+  <div class="section-title">6가지 핵심 기능</div>
+  <div class="section-desc">오디오 믹싱의 전체 워크플로우를 커버하는 AI 파이프라인.</div>
+
+  <div class="features-grid">
+    <div class="feature-card">
+      <div class="feature-icon" style="background:rgba(108,99,255,0.15)">🎛️</div>
+      <h3>자연어 믹싱</h3>
+      <p>"리버브 걸어줘", "0:05~0:15 구간만 밝게" 같은 자연어를 333개 믹싱 컨셉에 매칭하여 REAPER 파라미터로 변환합니다.</p>
+      <span class="feature-tag">Claude / Gemini</span>
+      <span class="feature-tag">Embedding</span>
+      <span class="feature-tag">Cosine Similarity</span>
+    </div>
+
+    <div class="feature-card">
+      <div class="feature-icon" style="background:rgba(0,212,170,0.15)">👤</div>
+      <h3>유저별 개인화</h3>
+      <p>유저의 과거 선택과 피드백을 학습하여, 같은 요청도 유저마다 다른 파라미터로 해석합니다. EMA 기반 선호도 추적.</p>
+      <span class="feature-tag">STM/LTM Memory</span>
+      <span class="feature-tag">EMA Tracking</span>
+      <span class="feature-tag">Feedback Loop</span>
+    </div>
+
+    <div class="feature-card">
+      <div class="feature-icon" style="background:rgba(255,217,61,0.15)">🎵</div>
+      <h3>AI 스템 분리 (Demucs)</h3>
+      <p>HTDemucs 모델로 보컬, 드럼, 베이스, 기타를 AI 기반 분리. 재귀 분리로 "other" 스템을 다시 세분화합니다.</p>
+      <span class="feature-tag">Demucs</span>
+      <span class="feature-tag">Recursive</span>
+      <span class="feature-tag">Async Job</span>
+    </div>
+
+    <div class="feature-card">
+      <div class="feature-icon" style="background:rgba(255,107,107,0.15)">🔊</div>
+      <h3>Mid/Side 스테레오 분리</h3>
+      <p>순수 DSP로 스테레오 신호를 센터(Mid)와 사이드(Side)로 분리. torchaudio 기반 실시간 처리.</p>
+      <span class="feature-tag">torchaudio</span>
+      <span class="feature-tag">DSP</span>
+    </div>
+
+    <div class="feature-card">
+      <div class="feature-icon" style="background:rgba(108,99,255,0.15)">🔬</div>
+      <h3>Gemini 오디오 분석</h3>
+      <p>Gemini 멀티모달 API로 오디오 파일을 직접 분석하여 악기 식별, 트랙 이름 제안, EQ 프로필을 추천합니다.</p>
+      <span class="feature-tag">Multimodal</span>
+      <span class="feature-tag">gemini-2.5-flash</span>
+    </div>
+
+    <div class="feature-card">
+      <div class="feature-icon" style="background:rgba(0,212,170,0.15)">🔗</div>
+      <h3>임베딩 시맨틱 매칭</h3>
+      <p>333개 믹싱 컨셉을 벡터화하여 코사인 유사도로 매칭합니다. DB에 없는 요청은 LLM이 직접 EQ 파라미터를 생성(raw_eq fallback)합니다.</p>
+      <span class="feature-tag">Embedding</span>
+      <span class="feature-tag">Vector Cache</span>
+      <span class="feature-tag">LLM Fallback</span>
+    </div>
+  </div>
+</section>
+
+<!-- API Endpoints -->
+<section class="fade-in">
+  <div class="section-label">API</div>
+  <div class="section-title">RESTful API Endpoints</div>
+  <div class="section-desc">FastAPI 기반 23개 엔드포인트. REAPER Lua 스크립트가 Bridge 패턴으로 비동기 통신합니다.</div>
+
+  <div class="api-grid">
+    <div class="api-item">
+      <span class="api-method post">POST</span>
+      <span class="api-path">/mix</span>
+      <div class="api-desc">자연어 쿼리 → Lua 코드 변환 (유저 개인화 포함)</div>
+    </div>
+    <div class="api-item">
+      <span class="api-method post">POST</span>
+      <span class="api-path">/bridge/push</span>
+      <div class="api-desc">비동기 명령 큐잉 (REAPER 폴링 패턴)</div>
+    </div>
+    <div class="api-item">
+      <span class="api-method get">GET</span>
+      <span class="api-path">/bridge/poll</span>
+      <div class="api-desc">REAPER가 대기 중인 명령을 가져감</div>
+    </div>
+    <div class="api-item">
+      <span class="api-method post">POST</span>
+      <span class="api-path">/demucs/start</span>
+      <div class="api-desc">AI 스템 분리 작업 시작</div>
+    </div>
+    <div class="api-item">
+      <span class="api-method post">POST</span>
+      <span class="api-path">/demucs/reseparate</span>
+      <div class="api-desc">재귀 스템 재분리</div>
+    </div>
+    <div class="api-item">
+      <span class="api-method post">POST</span>
+      <span class="api-path">/midside/start</span>
+      <div class="api-desc">Mid/Side 스테레오 분리</div>
+    </div>
+    <div class="api-item">
+      <span class="api-method post">POST</span>
+      <span class="api-path">/analyze/audio</span>
+      <div class="api-desc">Gemini 멀티모달 오디오 분석</div>
+    </div>
+    <div class="api-item">
+      <span class="api-method get">GET</span>
+      <span class="api-path">/users/{id}/profile</span>
+      <div class="api-desc">유저 프로필 및 선호도 조회</div>
+    </div>
+    <div class="api-item">
+      <span class="api-method post">POST</span>
+      <span class="api-path">/users/{id}/feedback</span>
+      <div class="api-desc">피드백으로 개인화 학습</div>
+    </div>
+  </div>
+</section>
+
+<!-- Tech Stack -->
+<section class="fade-in">
+  <div class="section-label">Stack</div>
+  <div class="section-title">기술 스택</div>
+  <div class="tech-grid">
+    <span class="tech-pill">Python</span>
+    <span class="tech-pill">FastAPI</span>
+    <span class="tech-pill">Claude / Gemini API</span>
+    <span class="tech-pill">text-embedding-004</span>
+    <span class="tech-pill">torchaudio</span>
+    <span class="tech-pill">Demucs (HTDemucs)</span>
+    <span class="tech-pill">asyncio</span>
+    <span class="tech-pill">Cosine Similarity</span>
+    <span class="tech-pill">EMA Tracking</span>
+    <span class="tech-pill">REAPER Lua</span>
+    <span class="tech-pill">JSON Persistence</span>
+    <span class="tech-pill">Bridge Pattern</span>
+  </div>
+
+  <div class="test-bar">
+    <div>
+      <div class="count">216 / 216</div>
+      <div class="pass">All tests passing</div>
+    </div>
+    <div class="test-progress">
+      <div class="test-progress-fill"></div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <p>Built by <strong>Chanin Jung</strong></p>
+  <p style="margin-top:0.5rem">ReaMix AI — 자연어로 음악을 믹싱하다</p>
+</footer>
+
+<script>
+// Scroll fade-in animation
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('visible');
+    }
+  });
+}, { threshold: 0.1 });
+
+document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+
+// Typing animation
+const demos = [
+  {
+    input: '"로우미드 살려서 바디감 좀 줘"',
+    output: '→ Concept: body\n→ ReaEQ: +3dB @ 250Hz (Q 0.7), Low Shelf +2dB @ 120Hz\n→ User A: intensity 0.30 → +1.5dB (내추럴)\n→ User B: intensity 0.90 → +4.5dB (아날로그) ✓'
+  },
+  {
+    input: '"하이엔드 좀 정리하고 2k 부근 디핑해줘"',
+    output: '→ Concepts: de_harsh, high_cut\n→ ReaEQ: -2.5dB @ 3kHz (Q 1.5), -1.5dB @ 8kHz\n→ User preference applied: intensity 0.65\n→ Lua generated → REAPER applied ✓'
+  },
+  {
+    input: '"보컬 분리해줘"',
+    output: '→ Action: stem_separation\n→ Demucs HTDemucs model loading...\n→ Stems: vocals, drums, bass, other\n→ Folder track created ✓'
+  },
+  {
+    input: '"킥 펀치감 살리고 룸 리버브 짧게"',
+    output: '→ Concepts: kick_punch, room\n→ ReaEQ: +3.5dB @ 60Hz (Q 1.0), +2.5dB @ 3kHz\n→ HF Rolloff: -1.5dB @ 8kHz (room feel)\n→ Multi-effect undo block ✓'
+  }
+];
+
+let demoIdx = 0;
+
+async function runTypingDemo() {
+  const inputEl = document.getElementById('typingInput');
+  const outputEl = document.getElementById('typingOutput');
+  if (!inputEl) return;
+
+  while (true) {
+    const demo = demos[demoIdx % demos.length];
+    demoIdx++;
+
+    // Clear
+    inputEl.innerHTML = '<span class="typing-cursor"></span>';
+    outputEl.classList.remove('visible');
+    outputEl.textContent = '';
+    await sleep(500);
+
+    // Type input
+    for (let i = 0; i < demo.input.length; i++) {
+      inputEl.innerHTML = demo.input.slice(0, i + 1) + '<span class="typing-cursor"></span>';
+      await sleep(60 + Math.random() * 40);
+    }
+
+    await sleep(600);
+
+    // Show output
+    outputEl.textContent = demo.output;
+    outputEl.classList.add('visible');
+
+    await sleep(4000);
+  }
+}
+
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+// Start typing demo when section is visible
+const typingObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      runTypingDemo();
+      typingObserver.disconnect();
+    }
+  });
+}, { threshold: 0.3 });
+
+const typingSection = document.getElementById('typingInput');
+if (typingSection) typingObserver.observe(typingSection.closest('section'));
+</script>
+
+</body>
+</html>
