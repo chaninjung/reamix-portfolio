@@ -752,9 +752,12 @@ async function startEngineerScript() {
       const res = await fetchMix(step.query, 'user_a');
       loading.remove();
 
-      // Real-time render from LLM's raw_eq
+      // Real-time render: raw_eq first, concept mapping fallback
       let audioFile = null;
       try { audioFile = await renderFromRawEq(res); } catch {}
+      if (!audioFile) {
+        try { audioFile = await renderAudioForResponse(res); } catch {}
+      }
       addLiveResponse('liveChatA', res, 'user_a', audioFile);
     } catch (e) {
       loading.remove();
