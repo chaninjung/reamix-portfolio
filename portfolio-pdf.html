@@ -305,7 +305,7 @@
   <div class="row" style="margin-bottom:20px">
     <div class="card" style="flex:1">
       <h3>건축설비 설계 <span class="dim">(4년)</span></h3>
-      <p>현장 비효율 체감<br>→ 자동화로 해결하겠다는 의지</p>
+      <p>설계 현장의 반복 업무와 비효율을 경험하며 "기술로 해결할 수 있다"는 확신</p>
     </div>
     <div style="display:flex;align-items:center;color:#4A3AFF;font-size:20px;font-weight:700">→</div>
     <div class="card" style="flex:1">
@@ -457,7 +457,7 @@
 <!-- ═══════════════════════════════════════ -->
 <div class="slide light">
   <h2>AWS 인프라 + LLM 관측성</h2>
-  <p class="subtitle">21 Pods · Terraform IaC · Langfuse 트레이싱 · CI/CD</p>
+  <p class="subtitle">외부 SaaS를 쓸 수 없는 사내 VPN 환경 → 모든 서비스를 직접 구축·운영해야 했습니다</p>
   <div class="accent-bar"></div>
 
   <div class="row">
@@ -485,9 +485,9 @@
     <div class="card" style="flex:1">
       <h3>워크플로우 자동화 (n8n)</h3>
       <ul>
-        <li>Mattermost ↔ Dify 자동 연결</li>
-        <li>정기 데이터 업데이트 자동 알림</li>
-        <li>사용자 질문 로깅 + 응답 모니터링</li>
+        <li>Mattermost ↔ Dify 연결 미들웨어</li>
+        <li>사용자 컨텍스트 파싱 + 라우팅</li>
+        <li>응답 포맷팅 + Mattermost 전달</li>
       </ul>
     </div>
   </div>
@@ -523,12 +523,12 @@
         <span class="tag">Claude / Gemini</span> <span class="tag">Embedding</span> <span class="tag">STM/LTM Memory</span> <span class="tag">EMA Tracking</span> <span class="tag">scipy DSP</span> <span class="tag">FastAPI</span> <span class="tag">Demucs</span>
       </div>
     </div>
-    <div style="flex:0.5">
-      <div class="card" style="border:2px solid #4A3AFF">
-        <h3 class="accent" style="font-size:12px">Live Demo</h3>
-        <p style="font-size:10px"><strong>chaninjung.github.io/reamix-portfolio</strong></p>
-      </div>
-    </div>
+  </div>
+
+  <div class="card" style="border:2px solid #4A3AFF;text-align:center;margin-top:10px;padding:12px 20px;background:#f8f8ff">
+    <h3 class="accent" style="font-size:16px;margin-bottom:4px">Live Demo 체험하기</h3>
+    <p style="font-size:14px;font-weight:700;color:#4A3AFF">chaninjung.github.io/reamix-portfolio</p>
+    <p style="font-size:10px;color:#888;margin-top:4px">가이드 시나리오 + 라이브 채팅 · 실제 오디오 처리 결과를 직접 들을 수 있습니다</p>
   </div>
   <span class="slide-num">8 / 14</span>
 </div>
@@ -617,6 +617,10 @@
       <h3>실시간 렌더링</h3>
       <p style="font-size:11px">scipy biquad 필터 + soundfile → 서버에서 즉시 WAV 생성 후 반환 (HF Spaces 배포)</p>
     </div>
+  </div>
+  <div class="card" style="margin-top:10px;background:#f8f8ff">
+    <h3 class="dim" style="font-size:11px">Discussion · 향후 발전 가능성</h3>
+    <p style="font-size:10px;color:#666">유저별 오디오 처리 결과에 대한 A/B 비교 평가 체계 구축 · 자연어 피드백에서 파라미터를 자동 추론하는 LLM 파이프라인 고도화 · 다국어 지원 확대 (현재 한국어/영어)</p>
   </div>
   <span class="slide-num">10 / 14</span>
 </div>
