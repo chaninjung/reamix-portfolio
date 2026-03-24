@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>Chanin Jung — AI LLM Portfolio</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+
+  @page {
+    size: 297mm 210mm; /* A4 landscape */
+    margin: 0;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', -apple-system, sans-serif;
+    color: #222;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .slide {
+    width: 297mm;
+    height: 210mm;
+    padding: 28mm 32mm;
+    page-break-after: always;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .slide:last-child { page-break-after: avoid; }
+
+  /* ── Slide themes ── */
+  .dark {
+    background: #12121f;
+    color: #e8e8f0;
+  }
+
+  .light {
+    background: #fafafe;
+    color: #222;
+  }
+
+  /* ── Typography ── */
+  .slide-num {
+    position: absolute;
+    bottom: 10mm;
+    right: 14mm;
+    font-size: 9px;
+    color: #999;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  h1 {
+    font-size: 36px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    line-height: 1.2;
+  }
+
+  h2 {
+    font-size: 24px;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+    margin-bottom: 6px;
+  }
+
+  h3 {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+
+  .subtitle {
+    font-size: 13px;
+    color: #888;
+    margin-bottom: 20px;
+  }
+
+  .accent-bar {
+    width: 50px;
+    height: 3px;
+    background: #4A3AFF;
+    margin: 12px 0 20px;
+  }
+
+  .accent { color: #4A3AFF; }
+  .green { color: #00B894; }
+  .coral { color: #FF6B6B; }
+  .dim { color: #888; }
+  .mono { font-family: 'JetBrains Mono', monospace; }
+
+  /* ── Layouts ── */
+  .row { display: flex; gap: 20px; }
+  .col { flex: 1; }
+
+  .card {
+    background: #f0f0f8;
+    border-radius: 10px;
+    padding: 16px 18px;
+  }
+
+  .card.dark-card {
+    background: #1a1a2e;
+    color: #ddd;
+  }
+
+  .card h3 { font-size: 14px; margin-bottom: 6px; }
+  .card p, .card li { font-size: 11.5px; line-height: 1.7; color: #555; }
+  .card.dark-card p, .card.dark-card li { color: #bbb; }
+
+  ul { padding-left: 16px; }
+  li { font-size: 12px; line-height: 1.8; }
+
+  /* ── Stats ── */
+  .stats {
+    display: flex;
+    gap: 16px;
+    margin: 16px 0;
+  }
+
+  .stat-box {
+    background: #f0f0f8;
+    border-radius: 8px;
+    padding: 12px 20px;
+    text-align: center;
+    flex: 1;
+  }
+
+  .stat-val {
+    font-size: 28px;
+    font-weight: 800;
+    color: #4A3AFF;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .stat-label {
+    font-size: 10px;
+    color: #888;
+    margin-top: 2px;
+  }
+
+  /* ── Table ── */
+  .match-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 11px;
+  }
+
+  .match-table th {
+    background: #4A3AFF;
+    color: white;
+    padding: 6px 10px;
+    text-align: left;
+    font-weight: 600;
+    font-size: 11px;
+  }
+
+  .match-table td {
+    padding: 6px 10px;
+    border-bottom: 1px solid #eee;
+  }
+
+  .match-table tr:nth-child(even) { background: #f8f8fc; }
+
+  .check { color: #00B894; font-weight: 700; }
+
+  /* ── Flow nodes ── */
+  .flow {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin: 16px 0;
+    flex-wrap: wrap;
+  }
+
+  .node {
+    background: #f0f0f8;
+    border-radius: 8px;
+    padding: 8px 14px;
+    font-size: 10px;
+    font-weight: 600;
+    text-align: center;
+    min-width: 70px;
+  }
+
+  .node.highlight {
+    background: #4A3AFF;
+    color: white;
+  }
+
+  .arrow { color: #4A3AFF; font-size: 16px; font-weight: 700; }
+
+  /* ── TOC ── */
+  .toc-item {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+
+  .toc-num {
+    font-size: 32px;
+    font-weight: 800;
+    color: #4A3AFF;
+    font-family: 'JetBrains Mono', monospace;
+    width: 60px;
+    text-align: right;
+  }
+
+  .toc-text h3 {
+    font-size: 18px;
+    color: #e8e8f0;
+    margin-bottom: 2px;
+  }
+
+  .toc-text p {
+    font-size: 12px;
+    color: #888;
+  }
+
+  /* ── Tags ── */
+  .tag {
+    display: inline-block;
+    background: #eeeef8;
+    border-radius: 4px;
+    padding: 2px 8px;
+    font-size: 10px;
+    font-weight: 500;
+    color: #4A3AFF;
+    margin: 2px 2px;
+  }
+
+  .bottomline {
+    position: absolute;
+    bottom: 18mm;
+    left: 32mm;
+    right: 32mm;
+    font-size: 11px;
+    font-weight: 600;
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════ -->
+<!-- SLIDE 1: COVER -->
+<!-- ═══════════════════════════════════════ -->
+<div class="slide dark">
+  <div style="margin-top:30mm">
+    <h1 style="font-size:42px;color:white;letter-spacing:2px">CHANIN JUNG</h1>
+    <p style="font-size:18px;color:#aab;margin-top:8px">AI / LLM Engineer Portfolio</p>
+    <div class="accent-bar" style="margin:16px 0 24px"></div>
+    <p style="font-size:14px;color:#99a">Blue Garage — LLM Engineer 지원</p>
+    <p style="font-size:11px;color:#667;margin-top:30px">
+      chaninjung7@gmail.com&nbsp;&nbsp;|&nbsp;&nbsp;linkedin.com/in/chaninjung
+    </p>
+    <div style="margin-top:20px">
+      <span class="tag" style="background:#2a2a44;color:#88f">LLM API</span>
+      <span class="tag" style="background:#2a2a44;color:#88f">RAG</span>
+      <span class="tag" style="background:#2a2a44;color:#88f">Persona</span>
+      <span class="tag" style="background:#2a2a44;color:#88f">Memory</span>
+      <span class="tag" style="background:#2a2a44;color:#88f">Audio DSP</span>
+      <span class="tag" style="background:#2a2a44;color:#88f">FastAPI</span>
+    </div>
+  </div>
+  <span class="slide-num" style="color:#556">1 / 14</span>
+</div>
+
+<!-- ═══════════════════════════════════════ -->
+<!-- SLIDE 2: TOC -->
+<!-- ═══════════════════════════════════════ -->
+<div class="slide dark">
+  <h2 style="color:white;margin-bottom:30px">목차</h2>
+  <div class="accent-bar"></div>
+
+  <div class="toc-item">
+    <div class="toc-num">01</div>
+    <div class="toc-text"><h3>About Me</h3><p>누구인가 — 기계공학에서 AI LLM 개발자까지</p></div>
+  </div>
+  <div class="toc-item">
+    <div class="toc-num">02</div>
+    <div class="toc-text"><h3>LLM 경력 — DMEC Thinker</h3><p>현 직장 · 사내 100명 AI 플랫폼 · RAG · Agent · 관측성</p></div>
+  </div>
+  <div class="toc-item">
+    <div class="toc-num">03</div>
+    <div class="toc-text"><h3>개인 프로젝트 — ReaMix AI</h3><p>자연어 오디오 믹싱 · 유저별 개인화 · 333개 컨셉 · Live Demo</p></div>
+  </div>
+  <div class="toc-item">
+    <div class="toc-num">04</div>
+    <div class="toc-text"><h3>Blue Garage 직무 적합성</h3><p>주요업무 · 자격요건 · 우대사항 매칭</p></div>
+  </div>
+  <span class="slide-num" style="color:#556">2 / 14</span>
+</div>
+
+<!-- ═══════════════════════════════════════ -->
+<!-- SLIDE 3: ABOUT ME -->
+<!-- ═══════════════════════════════════════ -->
+<div class="slide light">
+  <h2>About Me</h2>
+  <p class="subtitle">기계공학 → 설계 자동화 → AI LLM 개발자</p>
+  <div class="accent-bar"></div>
+
+  <div class="row" style="margin-bottom:20px">
+    <div class="card" style="flex:1">
+      <h3>건축설비 설계 <span class="dim">(4년)</span></h3>
+      <p>현장 비효율 체감 → 자동화로 해결하겠다는 의지</p>
+    </div>
+    <div style="display:flex;align-items:center;color:#4A3AFF;font-size:20px;font-weight:700">→</div>
+    <div class="card" style="flex:1">
+      <h3>Revit Add-in 개발 <span class="dim">(1년)</span></h3>
+      <p>ML 논문(IEEE) 출판 후 이직<br>PID→SVR 모터 제어로 ML 입문</p>
+    </div>
+    <div style="display:flex;align-items:center;color:#4A3AFF;font-size:20px;font-weight:700">→</div>
+    <div class="card" style="flex:1;border:2px solid #4A3AFF">
+      <h3 class="accent">AI LLM 개발 <span class="dim">(현재)</span></h3>
+      <p>사내 100명 AI 플랫폼 구축<br>RAG · Agent · 관측성 시스템</p>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="card" style="flex:1">
+      <h3>학문 배경</h3>
+      <p>기계공학 + 의공학 + 철학(복수전공) — 문이과를 넘나드는 융합적 사고</p>
+    </div>
+    <div class="card" style="flex:1">
+      <h3>음악과 AI의 교차점</h3>
+      <p>기타 20년 · ISMIR 학회 참석 · 뉴올리언스/멤피스 탐방<br>모두의연구소 커뮤니티 학습</p>
+    </div>
+  </div>
+  <span class="slide-num">3 / 14</span>
+</div>
+
+<!-- ═══════════════════════════════════════ -->
+<!-- SLIDE 4: DMEC OVERVIEW -->
+<!-- ═══════════════════════════════════════ -->
+<div class="slide light">
+  <h2>02. DMEC Thinker <span class="dim" style="font-size:14px">— 현 직장 프로젝트</span></h2>
+  <p class="subtitle">사내 6개 부서 100명이 사용하는 AI 플랫폼</p>
+  <div class="accent-bar"></div>
+
+  <div class="row">
+    <div style="flex:1">
+      <h3 class="accent" style="margin-bottom:10px">비즈니스 임팩트</h3>
+      <ul>
+        <li><strong>기술 검색 1주일 → 1분</strong> (Agent 자동 검색 + 근거 제시)</li>
+        <li>사내 <strong>6개 부서 100명</strong> 대상 프로덕션 운영 중</li>
+        <li>비개발자도 Mattermost에서 자연어로 질문 → 즉시 응답</li>
+      </ul>
+
+      <h3 class="accent" style="margin-top:16px;margin-bottom:10px">기술 구성</h3>
+      <ul>
+        <li><strong>Dify Agent</strong> — Gemini Flash, 멀티 도구 호출</li>
+        <li><strong>RAG</strong> — BM25 + Kiwi 형태소, 비용 33원→10원</li>
+        <li><strong>Langfuse</strong> — LLM 호출 트레이싱 + 품질 평가</li>
+        <li><strong>AWS EKS</strong> — 21 Pods, Terraform, SSO</li>
+      </ul>
+    </div>
+    <div style="flex:0.8">
+      <div class="card" style="height:100%">
+        <h3 style="margin-bottom:8px">Tech Stack</h3>
+        <span class="tag">Dify</span>
+        <span class="tag">Gemini Flash</span>
+        <span class="tag">BM25</span>
+        <span class="tag">Kiwi</span>
+        <span class="tag">Langfuse</span>
+        <span class="tag">AWS EKS</span>
+        <span class="tag">Terraform</span>
+        <span class="tag">Keycloak SSO</span>
+        <span class="tag">n8n</span>
+        <span class="tag">Mattermost</span>
+        <span class="tag">GitHub Actions</span>
+        <span class="tag">Kustomize</span>
+      </div>
+    </div>
+  </div>
+  <span class="slide-num">4 / 14</span>
+</div>
+
+<!-- ═══════════════════════════════════════ -->
+<!-- SLIDE 5: DMEC ARCHITECTURE -->
+<!-- ═══════════════════════════════════════ -->
+<div class="slide light">
+  <h2>DMEC Thinker — Agent 아키텍처</h2>
+  <p class="subtitle">Mattermost → n8n → Dify Agent → 법령 자동 검색 → 응답</p>
+  <div class="accent-bar"></div>
+
+  <div class="flow">
+    <div class="node">Mattermost<br><span class="dim" style="font-size:8px">사용자 질문</span></div>
+    <span class="arrow">→</span>
+    <div class="node">n8n<br><span class="dim" style="font-size:8px">라우팅</span></div>
+    <span class="arrow">→</span>
+    <div class="node highlight">Dify Agent<br><span style="font-size:8px">Gemini 3 Flash</span></div>
+    <span class="arrow">→</span>
+    <div class="node">KCSC API<br><span class="dim" style="font-size:8px">+ 법령 API</span></div>
+    <span class="arrow">→</span>
+    <div class="node">Langfuse<br><span class="dim" style="font-size:8px">트레이싱</span></div>
+  </div>
+
+  <div class="row" style="margin-top:12px">
+    <div class="card" style="flex:1">
+      <h3>Agent 작동 예시</h3>
+      <p style="font-style:italic;margin-bottom:6px">"건축허가 시 소방시설 기준 알려줘"</p>
+      <ol style="padding-left:16px">
+        <li style="font-size:11px;line-height:1.8">Agent 질문 분석 → 건축법 관련 판단</li>
+        <li style="font-size:11px;line-height:1.8">KCSC API → 관련 법령 검색</li>
+        <li style="font-size:11px;line-height:1.8">법령 조문 확인 → 시행령 추적</li>
+        <li style="font-size:11px;line-height:1.8">법령처 API → 시행령/조례 조회</li>
+        <li style="font-size:11px;line-height:1.8">최종 답변 생성 <span class="accent">(3회 도구 호출, 평균 36초)</span></li>
+      </ol>
+    </div>
+    <div class="card" style="flex:1">
+      <h3>모델 라우팅 + 비용 최적화</h3>
+      <ul>
+        <li style="font-size:11px">질문 유형별 Flash / Flash Lite 라우팅</li>
+        <li style="font-size:11px">단순 법령 검색 <strong class="green">11초</strong> 내 응답</li>
+        <li style="font-size:11px">Gemini Context Caching 활용</li>
+        <li style="font-size:11px">Agent 4회 호출(33원) → RAG 1회(10원) 최적화 중</li>
+      </ul>
+    </div>
+  </div>
+  <span class="slide-num">5 / 14</span>
+</div>
+
+<!-- ═══════════════════════════════════════ -->
+<!-- SLIDE 6: RAG + QUALITY -->
+<!-- ═══════════════════════════════════════ -->
+<div class="slide light">
+  <h2>RAG 파이프라인 + 품질 평가</h2>
+  <p class="subtitle">BM25 + 형태소 분석 · Recall@K 정량 평가 · false positive 0건 달성</p>
+  <div class="accent-bar"></div>
+
+  <div class="row">
+    <div style="flex:1">
+      <h3 class="accent" style="margin-bottom:8px">RAG 파이프라인</h3>
+      <ul>
+        <li>BM25 + Kiwi 형태소 분석 — 건설 전문 용어 최적화</li>
+        <li>K=5 전문 로드 — 청크가 아닌 <strong>문서 전체</strong>를 LLM에 전달</li>
+        <li>비용: Agent 4회(33원) → RAG 1회(~10원) <span class="green">3배 절감</span></li>
+      </ul>
+
+      <h3 class="accent" style="margin-top:16px;margin-bottom:8px">LoRA 파인튜닝 경험</h3>
+      <ul>
+        <li>CAD LISP 코드 생성 모델 연구</li>
+        <li>LLM-as-Judge 90점+ 필터링, 3,800개 데이터 구축</li>
+        <li>instruction-answer: <strong>38%</strong> → chain-of-thought: <strong class="green">90%</strong></li>
+      </ul>
+    </div>
+    <div style="flex:1">
+      <div class="card" style="border:2px solid #00B894">
+        <h3 class="green" style="margin-bottom:10px">품질 평가 체계</h3>
+        <ul>
+          <li>전문가 검수 <strong>50개</strong> 검증 데이터셋 구축</li>
+          <li>Recall@5: <strong class="accent">82.0%</strong></li>
+          <li>출처 검색 성공 시 정확도: <strong>87.8%</strong></li>
+          <li>출처 검색 실패 시 정확도: 66.7%</li>
+          <li style="margin-top:6px"><strong class="green">false positive 11건 → 0건 제거</strong><br><span class="dim" style="font-size:10px">잘못된 답변을 맞다고 하는 경우 완전 차단</span></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <span class="slide-num">6 / 14</span>
+</div>
+
+<!-- ═══════════════════════════════════════ -->
+<!-- SLIDE 7: INFRA -->
+<!-- ═══════════════════════════════════════ -->
+<div class="slide light">
+  <h2>AWS 인프라 + LLM 관측성</h2>
+  <p class="subtitle">21 Pods · Terraform IaC · Langfuse 트레이싱 · CI/CD</p>
+  <div class="accent-bar"></div>
+
+  <div class="row">
+    <div class="card" style="flex:1">
+      <h3>AWS EKS 인프라</h3>
+      <ul>
+        <li>21개 Pod, 6개 서비스 운영</li>
+        <li>Terraform 6개 모듈 IaC</li>
+        <li>Kustomize 환경 분리 (dev/prod)</li>
+        <li>Keycloak SSO 통합 인증 (1번 로그인 → 5개 서비스)</li>
+        <li>GitHub Actions CI/CD</li>
+        <li>IRSA (Pod별 IAM) + VPN 연동</li>
+      </ul>
+    </div>
+    <div class="card" style="flex:1">
+      <h3>LLM 관측성 (Langfuse)</h3>
+      <ul>
+        <li>전체 LLM 호출 트레이싱</li>
+        <li>프롬프트 버전 관리 + A/B 비교</li>
+        <li>토큰 사용량 · 응답 시간 · API 비용 대시보드</li>
+        <li>LLM-as-Judge: 응답 품질 자동 평가 (정성)</li>
+        <li>Recall@K: 검색 정확도 측정 (정량)</li>
+      </ul>
+    </div>
+    <div class="card" style="flex:1">
+      <h3>워크플로우 자동화 (n8n)</h3>
+      <ul>
+        <li>Mattermost ↔ Dify 자동 연결</li>
+        <li>KCSC 크롤링 → MD 변환 → S3</li>
+        <li>정기 데이터 업데이트 자동 알림</li>
+        <li>형태소 분석(Kiwi) + BM25 인덱싱</li>
+      </ul>
+    </div>
+  </div>
+  <span class="slide-num">7 / 14</span>
+</div>
+
+<!-- ═══════════════════════════════════════ -->
+<!-- SLIDE 8: REAMIX OVERVIEW -->
+<!-- ═══════════════════════════════════════ -->
+<div class="slide light">
+  <h2>03. ReaMix AI <span class="dim" style="font-size:14px">— 개인 프로젝트</span></h2>
+  <p class="subtitle">자연어로 오디오를 믹싱하는 AI 어시스턴트 · 유저별 개인화 엔진</p>
+  <div class="accent-bar"></div>
+
+  <div class="stats">
+    <div class="stat-box"><div class="stat-val">333</div><div class="stat-label">Mixing Concepts</div></div>
+    <div class="stat-box"><div class="stat-val">23</div><div class="stat-label">API Endpoints</div></div>
+    <div class="stat-box"><div class="stat-val">216</div><div class="stat-label">Tests Passing</div></div>
+    <div class="stat-box"><div class="stat-val">8</div><div class="stat-label">Core Modules</div></div>
+  </div>
+
+  <div class="row">
+    <div style="flex:1">
+      <h3 class="accent">"로우미드 살려서 바디감 줘"</h3>
+      <p style="font-size:12px;line-height:1.8;margin-top:6px">
+        자연어를 333개 믹싱 컨셉에 매칭 → LLM이 EQ 파라미터 생성 → 실시간 오디오 렌더링<br>
+        <strong>같은 요청도 유저마다 다른 파라미터로 해석</strong> (STM/LTM 메모리 + EMA 선호도 추적)
+      </p>
+      <div style="margin-top:10px">
+        <span class="tag">Claude / Gemini</span>
+        <span class="tag">Embedding</span>
+        <span class="tag">STM/LTM Memory</span>
+        <span class="tag">EMA Tracking</span>
+        <span class="tag">scipy DSP</span>
+        <span class="tag">FastAPI</span>
+        <span class="tag">Demucs</span>
+        <span class="tag">torchaudio</span>
+      </div>
+    </div>
+    <div style="flex:0.7">
+      <div class="card" style="border:2px solid #4A3AFF">
+        <h3 class="accent">Live Demo</h3>
+        <p style="font-size:11px;margin-top:6px">
+          <strong>chaninjung.github.io/reamix-portfolio</strong><br><br>
+          가이드 시나리오 + 라이브 채팅 모드<br>
+          실제 오디오 처리 결과를 직접 들을 수 있습니다
+        </p>
+      </div>
+    </div>
+  </div>
+  <span class="slide-num">8 / 14</span>
+</div>
+
+<!-- ═══════════════════════════════════════ -->
+<!-- SLIDE 9: REAMIX PERSONALISATION -->
+<!-- ═══════════════════════════════════════ -->
+<div class="slide light">
+  <h2>ReaMix AI — 유저별 개인화 엔진</h2>
+  <p class="subtitle">같은 말, 다른 해석 · STM/LTM 메모리 + EMA 선호도 추적</p>
+  <div class="accent-bar"></div>
+
+  <div class="row" style="margin-bottom:14px">
+    <div class="card" style="flex:1;border-left:4px solid #4A3AFF">
+      <h3 class="accent">User A — 내추럴 톤</h3>
+      <p class="dim" style="font-size:10px">Style: natural/transparent · preferred_intensity: 0.30</p>
+      <p style="font-size:11px;margin-top:6px"><strong>"로우미드 살려서 바디감 줘"</strong></p>
+      <p class="mono" style="font-size:10px;margin-top:6px;color:#555">
+        ReaEQ: 280Hz +1.5dB (Q 0.8)<br>
+        Low Shelf: 120Hz +1.0dB<br>
+        <span class="accent">→ 절제된 바디감</span>
+      </p>
+    </div>
+    <div class="card" style="flex:1;border-left:4px solid #FF6B6B">
+      <h3 class="coral">User B — 아날로그 톤</h3>
+      <p class="dim" style="font-size:10px">Style: analog/colored · preferred_intensity: 0.90</p>
+      <p style="font-size:11px;margin-top:6px"><strong>"로우미드 살려서 바디감 줘"</strong></p>
+      <p class="mono" style="font-size:10px;margin-top:6px;color:#555">
+        ReaEQ: 250Hz +4.5dB (Q 0.6)<br>
+        Low Shelf: 120Hz +3.0dB<br>
+        HF Rolloff: 6kHz −1.5dB<br>
+        <span class="coral">→ 풍성한 아날로그 톤</span>
+      </p>
+    </div>
+  </div>
+
+  <div class="card" style="background:#f8f8ff">
+    <div class="row" style="gap:30px">
+      <div style="flex:1">
+        <h3>피드백 → 학습 → 반영</h3>
+        <p style="font-size:11px">User B: "로우미드가 좀 과한데" → intensity 0.90→0.71 자동 조정 → 다음 요청에서 EQ +3dB로 감소</p>
+      </div>
+      <div style="flex:1">
+        <h3>메모리 아키텍처</h3>
+        <p style="font-size:11px">STM: 최근 50개 대화 (rolling window)<br>LTM: 선호도, 스타일 태그, 프로필 노트 (영구 저장 + 자동 요약 압축)</p>
+      </div>
+    </div>
+  </div>
+  <span class="slide-num">9 / 14</span>
+</div>
+
+<!-- ═══════════════════════════════════════ -->
+<!-- SLIDE 10: REAMIX ARCHITECTURE -->
+<!-- ═══════════════════════════════════════ -->
+<div class="slide light">
+  <h2>ReaMix AI — End-to-End 아키텍처</h2>
+  <p class="subtitle">자연어 → LLM → raw_eq 파라미터 → 실시간 오디오 렌더링</p>
+  <div class="accent-bar"></div>
+
+  <div class="flow">
+    <div class="node">자연어<br>입력</div>
+    <span class="arrow">→</span>
+    <div class="node">Query<br>Parser</div>
+    <span class="arrow">→</span>
+    <div class="node">Embedding<br>Match</div>
+    <span class="arrow">→</span>
+    <div class="node highlight">LLM<br>(Claude)</div>
+    <span class="arrow">→</span>
+    <div class="node">raw_eq<br>파라미터</div>
+    <span class="arrow">→</span>
+    <div class="node">scipy<br>DSP</div>
+    <span class="arrow">→</span>
+    <div class="node">Audio<br>Output</div>
+  </div>
+
+  <div class="row" style="margin-top:10px">
+    <div class="card" style="flex:1">
+      <h3>333개 Concept DB</h3>
+      <p style="font-size:11px">10개 카테고리: 따뜻함/바디, 밝기/에어, 보컬, 악기별, 공간, 장르, 보정, 다이나믹, 크리에이티브, 주파수별</p>
+    </div>
+    <div class="card" style="flex:1">
+      <h3>LLM raw_eq Fallback</h3>
+      <p style="font-size:11px">DB에 없는 요청 → LLM이 직접 EQ 파라미터 생성 (freq, gain, Q) → 그대로 DSP 적용</p>
+    </div>
+    <div class="card" style="flex:1">
+      <h3>실시간 렌더링</h3>
+      <p style="font-size:11px">scipy biquad 필터 + soundfile → 서버에서 즉시 WAV 생성 후 반환 (HF Spaces 배포)</p>
+    </div>
+  </div>
+  <span class="slide-num">10 / 14</span>
+</div>
+
+<!-- ═══════════════════════════════════════ -->
+<!-- SLIDE 11: REAMIX → AI ARTIST -->
+<!-- ═══════════════════════════════════════ -->
+<div class="slide light">
+  <h2>ReaMix → AI 아티스트 페르소나</h2>
+  <p class="subtitle">동일한 아키텍처가 AI 아티스트 챗봇에 직접 적용됩니다</p>
+  <div class="accent-bar"></div>
+
+  <table class="match-table">
+    <tr><th style="width:45%">ReaMix AI (구현 완료)</th><th style="width:10%"></th><th style="width:45%">AI 아티스트 챗봇 (적용 가능)</th></tr>
+    <tr><td>유저별 선호 intensity 학습</td><td class="accent" style="text-align:center;font-weight:700">→</td><td>팬별 대화 스타일 학습</td></tr>
+    <tr><td>STM/LTM 메모리 아키텍처</td><td class="accent" style="text-align:center;font-weight:700">→</td><td>팬과의 장기 관계 기억</td></tr>
+    <tr><td>같은 "로우미드 살려줘"를 다르게 해석</td><td class="accent" style="text-align:center;font-weight:700">→</td><td>같은 인사를 팬마다 다르게</td></tr>
+    <tr><td>EMA 기반 선호도 자동 조정</td><td class="accent" style="text-align:center;font-weight:700">→</td><td>팬 피드백으로 페르소나 미세조정</td></tr>
+    <tr><td>LLM 프롬프트에 유저 컨텍스트 주입</td><td class="accent" style="text-align:center;font-weight:700">→</td><td>시스템 프롬프트에 팬 히스토리 주입</td></tr>
+    <tr><td>감정 인식 → 공감 모드</td><td class="accent" style="text-align:center;font-weight:700">→</td><td>팬 감정에 따른 응답 톤 조절</td></tr>
+    <tr><td>대화 요약 → LTM 이관</td><td class="accent" style="text-align:center;font-weight:700">→</td><td>오래된 대화 기억 압축 보존</td></tr>
+  </table>
+
+  <p class="bottomline green">핵심: 유저별 개인화 + 장기 메모리 + 감정 인식은 도메인에 관계없이 동일한 구조입니다.</p>
+  <span class="slide-num">11 / 14</span>
+</div>
+
+<!-- ═══════════════════════════════════════ -->
+<!-- SLIDE 12: JOB FIT -->
+<!-- ═══════════════════════════════════════ -->
+<div class="slide light">
+  <h2>04. Blue Garage 직무 적합성</h2>
+  <p class="subtitle">주요업무 · 자격요건 · 우대사항 항목별 매칭</p>
+  <div class="accent-bar"></div>
+
+  <table class="match-table" style="font-size:10.5px">
+    <tr><th style="width:5%"></th><th style="width:40%">요구사항</th><th style="width:55%">보유 역량</th></tr>
+    <tr><td class="check">✓</td><td>LLM 페르소나 + 프롬프트 엔지니어링</td><td>ReaMix 333개 컨셉 프롬프트 + DMEC Agent 설계</td></tr>
+    <tr><td class="check">✓</td><td>RAG + 메모리 아키텍처 (장기기억)</td><td>STM/LTM 메모리 + BM25 RAG + 대화 요약 압축</td></tr>
+    <tr><td class="check">✓</td><td>저지연 챗봇 파이프라인</td><td>asyncio + 모델 라우팅 + 11초 응답</td></tr>
+    <tr><td class="check">✓</td><td>품질 평가 체계 구축</td><td>Recall@K + LLM-as-Judge + Langfuse 트레이싱</td></tr>
+    <tr><td class="check">✓</td><td>오픈소스 LLM 파인튜닝 <span class="dim">(우대)</span></td><td>LoRA 파인튜닝 38%→90% (CoT 데이터 품질 검증)</td></tr>
+    <tr><td class="check">✓</td><td>MLOps 파이프라인 <span class="dim">(우대)</span></td><td>AWS EKS 21 Pods + Terraform + GitHub Actions</td></tr>
+    <tr><td class="check">✓</td><td>엔터테인먼트 도메인 관심 <span class="dim">(우대)</span></td><td>기타 20년 · ISMIR · ReaMix AI 오디오 DSP</td></tr>
+    <tr><td class="check">✓</td><td>Python/비동기 처리 <span class="dim">(우대)</span></td><td>FastAPI + asyncio + scipy/torchaudio</td></tr>
+  </table>
+
+  <p class="bottomline"><span class="green" style="font-size:13px">자격요건 3/3 충족 · 우대사항 5/6 충족</span></p>
+  <span class="slide-num">12 / 14</span>
+</div>
+
+<!-- ═══════════════════════════════════════ -->
+<!-- SLIDE 13: WHY ME -->
+<!-- ═══════════════════════════════════════ -->
+<div class="slide light">
+  <h2>왜 저를 뽑아야 하는가</h2>
+  <p class="subtitle">기술자이자 20년간 음악 팬 — 양쪽의 언어를 이해하는 엔지니어</p>
+  <div class="accent-bar"></div>
+
+  <div class="row" style="gap:16px">
+    <div class="card" style="flex:1;border-top:3px solid #4A3AFF">
+      <h3 class="accent">1. 이미 검증된 개인화 엔진</h3>
+      <p style="font-size:11px;margin-top:6px">
+        ReaMix AI에서 유저별 STM/LTM 메모리 + EMA 선호도 + 감정 인식을 구현했습니다.
+        이 구조는 AI 아티스트가 팬마다 다른 대화를 유지하는 것과 동일합니다.
+      </p>
+    </div>
+    <div class="card" style="flex:1;border-top:3px solid #00B894">
+      <h3 class="green">2. 프로덕션 레벨 경험</h3>
+      <p style="font-size:11px;margin-top:6px">
+        사내 100명이 실제로 사용하는 AI 플랫폼을 구축·운영하고 있습니다.
+        PoC가 아닌 프로덕션에서의 안정성, 관측성, 비용 최적화를 경험했습니다.
+      </p>
+    </div>
+    <div class="card" style="flex:1;border-top:3px solid #FF6B6B">
+      <h3 class="coral">3. 음악을 사랑하는 엔지니어</h3>
+      <p style="font-size:11px;margin-top:6px">
+        기타 20년, ISMIR 학회, 뉴올리언스·멤피스 탐방.
+        AI가 아티스트를 대체하는 것이 아닌 공존하는 방향 — 이것이 Blue Garage에 지원하는 이유입니다.
+      </p>
+    </div>
+  </div>
+  <span class="slide-num">13 / 14</span>
+</div>
+
+<!-- ═══════════════════════════════════════ -->
+<!-- SLIDE 14: CLOSING -->
+<!-- ═══════════════════════════════════════ -->
+<div class="slide dark" style="display:flex;flex-direction:column;justify-content:center">
+  <h1 style="color:white;font-size:38px">감사합니다</h1>
+  <div class="accent-bar" style="margin:16px 0 24px"></div>
+  <p style="font-size:16px;color:#ccd;font-weight:600">정찬인 (Chanin Jung)</p>
+  <p style="font-size:13px;color:#99a;margin-top:12px">
+    chaninjung7@gmail.com<br>
+    linkedin.com/in/chaninjung
+  </p>
+  <p style="font-size:12px;color:#4A3AFF;margin-top:20px;font-weight:600">
+    ReaMix AI Live Demo: chaninjung.github.io/reamix-portfolio
+  </p>
+  <span class="slide-num" style="color:#556">14 / 14</span>
+</div>
+
+</body>
+</html>
