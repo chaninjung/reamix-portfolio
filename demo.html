@@ -754,10 +754,11 @@ async function startEngineerScript() {
 
       // Real-time render: raw_eq first, concept mapping fallback
       let audioFile = null;
-      try { audioFile = await renderFromRawEq(res); } catch {}
+      try { audioFile = await renderFromRawEq(res); } catch (e) { console.warn('[EngineerScript] renderFromRawEq error:', e); }
       if (!audioFile) {
-        try { audioFile = await renderAudioForResponse(res); } catch {}
+        try { audioFile = await renderAudioForResponse(res); } catch (e) { console.warn('[EngineerScript] renderAudioForResponse error:', e); }
       }
+      if (!audioFile) { console.warn('[EngineerScript] No audio rendered for:', res.concepts, 'raw_eq:', res.raw_eq); }
       addLiveResponse('liveChatA', res, 'user_a', audioFile);
     } catch (e) {
       loading.remove();
@@ -809,10 +810,11 @@ async function liveSendB() {
 
     // Render audio: raw_eq first (real LLM params), concept mapping fallback
     let audioFile = null;
-    try { audioFile = await renderFromRawEq(res); } catch {}
+    try { audioFile = await renderFromRawEq(res); } catch (e) { console.warn('[UserB] renderFromRawEq error:', e); }
     if (!audioFile) {
-      try { audioFile = await renderAudioForResponse(res); } catch {}
+      try { audioFile = await renderAudioForResponse(res); } catch (e) { console.warn('[UserB] renderAudioForResponse error:', e); }
     }
+    if (!audioFile) { console.warn('[UserB] No audio rendered for:', res.concepts, 'raw_eq:', res.raw_eq); }
     addLiveResponse('liveChatB', res, 'user_b', audioFile);
   } catch (e) {
     loading.remove();
@@ -917,34 +919,57 @@ async function renderFromRawEq(res) {
   const rawEq = res.raw_eq;
   if (!rawEq || !Array.isArray(rawEq) || rawEq.length === 0) return null;
 
-  // Convert LLM raw_eq format to /demo/process format
+  // Types that the /demo/process DSP engine can handle
+  const dspTypes = new Set([
+    'peaking', 'peaking_eq', 'low_shelf', 'high_shelf',
+    'high_pass', 'low_pass', 'saturation',
+  ]);
+
+  // Convert LLM raw_eq format to /demo/process format, skipping non-DSP types
   const effects = rawEq.map(eq => {
-    if (eq.type === 'saturation') {
+    const eqType = (eq.type || '').toLowerCase();
+
+    // Skip non-EQ effect types that the DSP engine cannot process
+    // (reverb, delay, compression, etc. are handled by REAPER, not our WAV renderer)
+    if (!dspTypes.has(eqType)) {
+      console.log(`[renderFromRawEq] Skipping non-DSP type: ${eqType}`);
+      return null;
+    }
+
+    if (eqType === 'saturation') {
       return { type: 'saturation', drive: eq.drive || eq.gain || 0.1 };
     }
     const typeMap = {
       'peaking': 'peaking_eq', 'peaking_eq': 'peaking_eq',
-      'low_shelf': 'low_shelf', 'high_shelf': 'peaking_eq',
+      'low_shelf': 'low_shelf', 'high_shelf': 'high_shelf',
       'high_pass': 'peaking_eq', 'low_pass': 'peaking_eq',
     };
     return {
-      type: typeMap[eq.type] || 'peaking_eq',
+      type: typeMap[eqType] || 'peaking_eq',
       freq: eq.freq || 1000,
-      gain: eq.gain || 0,
+      gain: typeof eq.gain === 'number' ? eq.gain : 0,
       Q: eq.Q || 0.8,
     };
-  }).filter(e => e.gain !== 0 || e.type === 'saturation');
+  }).filter(e => e !== null && (e.gain !== 0 || e.type === 'saturation'));
 
   if (effects.length === 0) return null;
 
-  const resp = await fetch(`${API}/demo/process`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ effects, intensity: 1.0 }), // intensity 1.0 = use LLM values as-is
-  });
-  if (!resp.ok) return null;
-  const data = await resp.json();
-  return API + data.audio_url;
+  try {
+    const resp = await fetch(`${API}/demo/process`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ effects, intensity: 1.0 }), // intensity 1.0 = use LLM values as-is
+    });
+    if (!resp.ok) {
+      console.warn(`[renderFromRawEq] /demo/process returned ${resp.status}`);
+      return null;
+    }
+    const data = await resp.json();
+    return API + data.audio_url;
+  } catch (e) {
+    console.warn('[renderFromRawEq] fetch failed:', e);
+    return null;
+  }
 }
 
 async function renderAudioForResponse(res) {
@@ -1153,10 +1178,11 @@ async function renderAudioForResponse(res) {
   let matched = false;
   for (const c of concepts) {
     const key = c.toLowerCase().replace(/[- ]/g, '_');
+    let conceptMatched = false;
     // Exact match first
     if (conceptMap[key]) {
       effects.push(...conceptMap[key]);
-      matched = true;
+      conceptMatched = true;
     } else {
       // Partial match: try splitting key and matching parts
       // e.g. "hall_large" → try "hall", "vocal_presence" → try "vocal_presence" then "vocal"
@@ -1165,16 +1191,17 @@ async function renderAudioForResponse(res) {
         const partial = parts.slice(0, i).join('_');
         if (conceptMap[partial]) {
           effects.push(...conceptMap[partial]);
-          matched = true;
+          conceptMatched = true;
           break;
         }
       }
       // Also try last part: "hall_large" → "large" won't help, but "bass_deep" → "bass" might
-      if (!matched && parts.length > 1 && conceptMap[parts[parts.length - 1]]) {
+      if (!conceptMatched && parts.length > 1 && conceptMap[parts[parts.length - 1]]) {
         effects.push(...conceptMap[parts[parts.length - 1]]);
-        matched = true;
+        conceptMatched = true;
       }
     }
+    if (conceptMatched) matched = true;
   }
 
   // Fallback: use raw_eq from LLM if concept didn't match
@@ -1196,14 +1223,22 @@ async function renderAudioForResponse(res) {
     effects.push({ type: 'peaking_eq', freq: 1000, gain: 2.0, Q: 0.8 });
   }
 
-  const resp = await fetch(`${API}/demo/process`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ effects, intensity }),
-  });
-  if (!resp.ok) return null;
-  const data = await resp.json();
-  return API + data.audio_url;
+  try {
+    const resp = await fetch(`${API}/demo/process`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ effects, intensity }),
+    });
+    if (!resp.ok) {
+      console.warn(`[renderAudioForResponse] /demo/process returned ${resp.status}`);
+      return null;
+    }
+    const data = await resp.json();
+    return API + data.audio_url;
+  } catch (e) {
+    console.warn('[renderAudioForResponse] fetch failed:', e);
+    return null;
+  }
 }
 
 let audioCounter = 0;
