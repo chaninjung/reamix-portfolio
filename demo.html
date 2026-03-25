@@ -752,6 +752,9 @@ async function startEngineerScript() {
       const res = await fetchMix(step.query, 'user_a');
       loading.remove();
 
+      // Show audio loading indicator
+      const audioLoading = addLiveMsg('liveChatA', '🔄 오디오 생성 중...', 'system');
+
       // Real-time render: raw_eq first, concept mapping fallback
       let audioFile = null;
       try { audioFile = await renderFromRawEq(res); } catch (e) { console.warn('[EngineerScript] renderFromRawEq error:', e); }
@@ -759,6 +762,7 @@ async function startEngineerScript() {
         try { audioFile = await renderAudioForResponse(res); } catch (e) { console.warn('[EngineerScript] renderAudioForResponse error:', e); }
       }
       if (!audioFile) { console.warn('[EngineerScript] No audio rendered for:', res.concepts, 'raw_eq:', res.raw_eq); }
+      if (audioLoading) audioLoading.remove();
       addLiveResponse('liveChatA', res, 'user_a', audioFile);
     } catch (e) {
       loading.remove();
@@ -808,6 +812,9 @@ async function liveSendB() {
     const res = await fetchMix(query, 'user_b');
     loading.remove();
 
+    // Show audio loading indicator
+    const audioLoading = addLiveMsg('liveChatB', '🔄 오디오 생성 중...', 'system');
+
     // Render audio: raw_eq first (real LLM params), concept mapping fallback
     let audioFile = null;
     try { audioFile = await renderFromRawEq(res); } catch (e) { console.warn('[UserB] renderFromRawEq error:', e); }
@@ -815,6 +822,7 @@ async function liveSendB() {
       try { audioFile = await renderAudioForResponse(res); } catch (e) { console.warn('[UserB] renderAudioForResponse error:', e); }
     }
     if (!audioFile) { console.warn('[UserB] No audio rendered for:', res.concepts, 'raw_eq:', res.raw_eq); }
+    if (audioLoading) audioLoading.remove();
     addLiveResponse('liveChatB', res, 'user_b', audioFile);
   } catch (e) {
     loading.remove();
