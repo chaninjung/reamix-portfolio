@@ -958,16 +958,29 @@ async function renderFromRawEq(res) {
     const resp = await fetch(`${API}/demo/process`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ effects, intensity: 1.0 }), // intensity 1.0 = use LLM values as-is
+      body: JSON.stringify({ effects, intensity: 1.0 }),
     });
     if (!resp.ok) {
       console.warn(`[renderFromRawEq] /demo/process returned ${resp.status}`);
       return null;
     }
     const data = await resp.json();
-    return API + data.audio_url;
+    // Fetch audio as blob to avoid CORS issues with <audio> src
+    return await fetchAudioAsBlob(API + data.audio_url);
   } catch (e) {
     console.warn('[renderFromRawEq] fetch failed:', e);
+    return null;
+  }
+}
+
+async function fetchAudioAsBlob(url) {
+  try {
+    const resp = await fetch(url);
+    if (!resp.ok) { console.warn('[fetchAudioAsBlob] HTTP', resp.status); return null; }
+    const blob = await resp.blob();
+    return URL.createObjectURL(blob);
+  } catch (e) {
+    console.warn('[fetchAudioAsBlob] failed:', e);
     return null;
   }
 }
@@ -1029,7 +1042,7 @@ async function renderAudioForResponse(res) {
     spacious:[P(6000,-0.8,0.7),P(10000,1.0,0.6)],
     wide:[P(6000,1.5,0.6),P(10000,1.0,0.6)], wide_stereo:[P(6000,1.5,0.6)],
     narrow:[P(6000,-1.5,0.6),P(300,1.0,0.8)],
-    room:[P(8000,-1.5,0.7),LS(80,0.5)], hall:[P(8000,-2.0,0.6),LS(100,1.0),P(2000,-0.5,0.8)],
+    room:[P(8000,-1.5,0.7),LS(80,0.5)], room_small:[P(8000,-1.0,0.8),LS(80,0.3)], room_medium:[P(8000,-1.5,0.7),LS(80,0.5)], room_large:[P(8000,-2.0,0.6),LS(100,1.0)], hall:[P(8000,-2.0,0.6),LS(100,1.0),P(2000,-0.5,0.8)], hall_large:[P(8000,-2.5,0.5),LS(100,1.5),P(2000,-1.0,0.7)], hall_small:[P(8000,-1.5,0.7),LS(80,0.5),P(2000,-0.3,0.8)],
     cathedral:[P(8000,-2.5,0.5),LS(100,1.5),P(2000,-1.0,0.7)],
     arena:[P(300,1.5,0.6),P(8000,-1.5,0.6),LS(80,1.0)],
     stadium:[P(200,2.0,0.5),P(8000,-2.0,0.5),LS(60,1.5)],
@@ -1234,7 +1247,7 @@ async function renderAudioForResponse(res) {
       return null;
     }
     const data = await resp.json();
-    return API + data.audio_url;
+    return await fetchAudioAsBlob(API + data.audio_url);
   } catch (e) {
     console.warn('[renderAudioForResponse] fetch failed:', e);
     return null;
